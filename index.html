@@ -7,13 +7,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #1c1c1c; --paper: #f4f4f4; --cream: #e8e8e8;
-    --accent: #444444; --gold: #666666; --sage: #4a4a4a;
+    --ink: #1c1c1c; --paper: #f6f6f6; --cream: #eaeaea;
+    --accent: #3a6ea8; --gold: #b08a00; --sage: #2e7d5a;
     --muted: #888888; --border: #cccccc;
-    --present: #2a6040; --present-bg: #ddf0e6;
-    --absent: #8b2020;  --absent-bg: #f5e0e0;
-    --practiced: #3a3a6a; --practiced-bg: #e8e8f5;
+    --present: #2a6040; --present-bg: #d6f0e4;
+    --absent: #8b2020;  --absent-bg: #f5dede;
+    --practiced: #3a3a8a; --practiced-bg: #e8e8f8;
     --shadow: 0 2px 12px rgba(0,0,0,0.10);
+    /* 出欠ボタン色 */
+    --btn-present: #2a6040; --btn-present-bg: #c8ecd8;
+    --btn-absent:  #8b2020; --btn-absent-bg:  #f0d0d0;
+    --btn-maybe:   #8a6800; --btn-maybe-bg:   #fef3b0;
+    --btn-none:    #666666; --btn-none-bg:    #e0e0e0;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Noto Sans JP', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; font-size: 14px; }
@@ -39,13 +44,13 @@
   /* ── TABS ── */
   .tab-bar { display: flex; background: var(--ink); border-top: 1px solid #2a2a3e; }
   .tab-btn { flex: 1; padding: 10px 2px; background: none; border: none; color: #6a6070; font-family: 'Noto Sans JP', sans-serif; font-size: 0.68rem; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
-  .tab-btn.active { color: var(--paper); border-bottom-color: var(--accent); }
+  .tab-btn.active { color: var(--paper); border-bottom-color: #5a9fd4; }
 
   /* ── SCREENS ── */
   .screen { display: none; padding: 16px; max-width: 520px; margin: 0 auto; }
   .screen.active { display: block; }
-  .section { background: white; border-radius: 10px; padding: 14px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-  .section-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--cream); display: flex; align-items: center; gap: 6px; }
+  .section { background: white; border-radius: 10px; padding: 14px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid #d4d4d4; }
+  .section-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #555; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e8e8e8; display: flex; align-items: center; gap: 6px; }
 
   /* ── INPUTS ── */
   .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -151,9 +156,9 @@
   details summary::-webkit-details-marker { display: none; }
 
   /* ── ADMIN SUB-TABS ── */
-  .sub-tab-bar { display: flex; background: var(--cream); border-radius: 10px; padding: 4px; gap: 4px; margin-bottom: 14px; }
-  .sub-tab-btn { flex: 1; padding: 8px 4px; background: none; border: none; color: var(--muted); font-family: 'Noto Sans JP', sans-serif; font-size: 0.78rem; font-weight: 500; cursor: pointer; border-radius: 7px; transition: all 0.18s; }
-  .sub-tab-btn.active { background: white; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.10); font-weight: 700; }
+  .sub-tab-bar { display: flex; background: #dde8f4; border-radius: 10px; padding: 4px; gap: 4px; margin-bottom: 14px; }
+  .sub-tab-btn { flex: 1; padding: 8px 4px; background: none; border: none; color: #4a6080; font-family: 'Noto Sans JP', sans-serif; font-size: 0.78rem; font-weight: 500; cursor: pointer; border-radius: 7px; transition: all 0.18s; }
+  .sub-tab-btn.active { background: white; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.12); font-weight: 700; }
   .sub-screen { display: none; }
   .sub-screen.active { display: block; }
   /* misc */
@@ -206,14 +211,15 @@
   .att-card.is-guest.s-absent    { background: #fce8e8; border-color: #c0392b; }
   .guest-name-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.65rem; background: #1a7abf; color: white; border-radius: 4px; padding: 1px 6px; font-weight: 700; flex-shrink: 0; }
 
-  /* ── att-card縦幅圧縮 ── */
   .att-card { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--paper); margin-bottom: 5px; transition: border-color 0.15s, background 0.15s; }
   .att-card.s-present   { background: var(--present-bg); border-color: var(--present); }
-  .att-card.s-absent    { background: var(--absent-bg);  border-color: #f0b8b8; }
-  .att-card.s-undecided { background: var(--cream);      border-color: var(--border); }
+  .att-card.s-absent    { background: var(--absent-bg);  border-color: #e08080; }
+  .att-card.s-maybe     { background: #fefbe0; border-color: #c8a800; }
+  .att-card.s-undecided { background: var(--cream); border-color: var(--border); }
   .s-present   .att-badge { background: var(--present); color: white; }
   .s-absent    .att-badge { background: var(--absent);  color: white; }
-  .s-undecided .att-badge { background: #c8bfaa;        color: white; }
+  .s-maybe     .att-badge { background: #b09000; color: white; }
+  .s-undecided .att-badge { background: #999; color: white; }
   .att-card-top { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; -webkit-user-select: none; margin-bottom: 4px; }
   .att-badge { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; }
   .att-member-name { font-size: 0.85rem; font-weight: 600; flex: 1; }
@@ -273,10 +279,11 @@
   .bulk-date-row:last-child { border-bottom: none; }
   .bulk-date-label { flex: 1; font-size: 0.82rem; }
   .bulk-date-memo  { font-size: 0.7rem; color: var(--muted); }
-  .bulk-att-btn { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 5px; border: none; cursor: pointer; font-family: inherit; transition: all 0.12s; min-width: 44px; text-align: center; }
+  .bulk-att-btn { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 5px; border: none; cursor: pointer; font-family: inherit; transition: all 0.12s; min-width: 36px; text-align: center; }
   .bulk-att-btn.present   { background: var(--present); color: white; }
+  .bulk-att-btn.maybe     { background: #c8a000; color: white; }
   .bulk-att-btn.absent    { background: var(--absent);  color: white; }
-  .bulk-att-btn.undecided { background: #c8bfaa;        color: white; }
+  .bulk-att-btn.undecided { background: #c8c8c8; color: #666; }
 
   /* ── バルク出欠：コメントボタン・入力欄 ── */
   .bulk-comment-btn { background: none; border: none; cursor: pointer; font-size: 1rem;
@@ -362,85 +369,98 @@
   .att-comment { font-family: inherit; font-size: 0.75rem; padding: 3px 8px; border: 1px solid var(--border); border-radius: 5px; flex: 1; background: rgba(255,255,255,0.6); color: var(--ink); outline: none; }
   .att-comment:focus { border-color: var(--sage); background: white; }
 
-  /* ── 練習タブ：コメント一覧バー ── */
-  .prac-comment-bar { display:flex; align-items:center; gap:8px; padding:9px 14px; background:var(--cream); border:1px solid var(--border); border-radius:9px; cursor:pointer; user-select:none; margin-bottom:8px; }
-  .prac-comment-bar-label { flex:1; font-size:0.82rem; font-weight:600; color:var(--muted); }
-  .prac-comment-bar-arrow { font-size:0.6rem; color:var(--muted); transition:transform 0.2s; }
-  .prac-comment-bar.open .prac-comment-bar-arrow { transform:rotate(90deg); }
-  .prac-comment-list { background:white; border:1px solid var(--border); border-radius:9px; padding:8px 12px; margin-bottom:8px; }
-  .prac-comment-item { display:flex; gap:8px; align-items:baseline; padding:5px 0; border-bottom:1px solid var(--cream); font-size:0.82rem; }
-  .prac-comment-item:last-child { border-bottom:none; }
-  .prac-comment-name { font-weight:600; flex-shrink:0; }
-  .prac-comment-text { color:var(--muted); flex:1; }
-
-  /* ── 練習タブ：パート別出欠 ── */
-  .prac-part-block { margin-bottom:10px; }
-  .prac-part-header { display:flex; align-items:center; gap:8px; padding:5px 10px; background:var(--ink); color:var(--paper); border-radius:7px; font-size:0.78rem; font-weight:700; }
-  .prac-part-name { flex:1; }
-  .prac-part-count { font-size:0.72rem; opacity:0.75; font-weight:500; }
-  .prac-member-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:6px 4px 4px; }
-  .prac-member-row { display:flex; align-items:center; gap:6px; padding:5px 8px; border-radius:7px; cursor:pointer; user-select:none; position:relative; transition:opacity 0.15s; }
-  .prac-member-row.s-absent   { opacity:0.55; }
-  .prac-member-row.s-undecided{ opacity:0.75; }
-  .prac-member-sym  { font-size:0.82rem; font-weight:700; flex-shrink:0; width:16px; text-align:center; }
-  .prac-member-sym.s-present  { color:var(--present); }
-  .prac-member-sym.s-absent   { color:var(--absent); }
-  .prac-member-sym.s-undecided{ color:var(--muted); }
-  .prac-member-name-cell { font-size:0.82rem; font-weight:500; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .prac-member-cmt-icon { font-size:0.75rem; flex-shrink:0; }
-  .prac-member-comment { font-size:0.75rem; opacity:0.7; }
-
+  /* ── 練習タブ（旧定義はファイル後半で上書き済み） ── */
   /* ── 個別コメントポップアップ ── */
-  .prac-member-comment-popup { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:300; align-items:flex-end; justify-content:center; }
+  .prac-member-comment-popup { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:300; align-items:flex-end; justify-content:center; }
   .prac-member-comment-popup.open { display:flex; }
-  .prac-comment-popup-inner { background:var(--paper); border-radius:16px 16px 0 0; padding:18px 18px 28px; width:100%; max-width:520px; animation:slideUp 0.2s ease; }
-  .prac-comment-popup-name { font-weight:700; font-size:1rem; margin-bottom:4px; }
-  .prac-comment-popup-text { font-size:0.88rem; color:var(--muted); line-height:1.6; }
   .date-chip-cnt { font-size:0.68rem; font-weight:700; color:var(--sage); margin-left:6px; }
+
+  /* ── 練習タブ：コメント一覧バー（緑系） ── */
+  .prac-comment-bar-label { flex:1; font-size:0.85rem; font-weight:700; color:#fff; }
+  .prac-comment-bar { display:flex; align-items:center; gap:8px; padding:9px 14px; background:#2e7d5a; border:none; border-radius:9px; cursor:pointer; user-select:none; margin-bottom:0; }
+  .prac-comment-bar-arrow { color:#b8f0d8; transition:transform 0.2s; font-size:0.6rem; }
+  .prac-comment-bar.open .prac-comment-bar-arrow { transform:rotate(90deg); }
+  .prac-comment-list { background:#f0faf5; border:1px solid #a8d8bc; border-radius:0 0 9px 9px; padding:8px 12px; margin-bottom:8px; border-top:none; }
+  .prac-comment-item { display:flex; gap:8px; align-items:baseline; padding:5px 0; border-bottom:1px solid #d0eedd; font-size:0.82rem; }
+  .prac-comment-item:last-child { border-bottom:none; }
+  .prac-comment-name { font-weight:700; flex-shrink:0; color:#1a5c3a; }
+  .prac-comment-text { color:#2a6040; flex:1; }
+
+  /* ── 練習タブ：メンバーボタン（区分色背景 + 出欠色ボーダー） ── */
+  .prac-member-row { border-radius:6px; border:2px solid transparent; padding:3px 5px; cursor:pointer; user-select:none; position:relative; display:flex; align-items:center; gap:4px; transition:all 0.12s; }
+  .prac-member-row.s-present   { border-color: var(--btn-present); }
+  .prac-member-row.s-absent    { border-color: var(--btn-absent); opacity:0.75; }
+  .prac-member-row.s-maybe     { border-color: var(--btn-maybe); }
+  .prac-member-row.s-undecided { border-color: #aaaaaa; opacity:0.7; }
+  /* 出欠シンボルの色 */
+  .prac-member-sym { font-size:0.78rem; font-weight:700; flex-shrink:0; width:14px; text-align:center; }
+  .prac-member-sym.s-present   { color: var(--btn-present); }
+  .prac-member-sym.s-absent    { color: var(--btn-absent); }
+  .prac-member-sym.s-maybe     { color: var(--btn-maybe); }
+  .prac-member-sym.s-undecided { color: #888; }
+  .prac-member-name-cell { font-size:0.75rem; font-weight:500; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .prac-member-cmt-icon { font-size:0.68rem; flex-shrink:0; }
+
+  /* ── 練習タブ：コメントフキダシ ── */
+  .prac-comment-popup-inner { background:#fff; border:2px solid #2e7d5a; border-radius:16px 16px 0 0; padding:18px 18px 28px; width:100%; max-width:520px; animation:slideUp 0.2s ease; }
+  .prac-comment-popup-name { font-weight:700; font-size:1rem; margin-bottom:4px; color:var(--ink); }
+  .prac-comment-popup-text { font-size:0.88rem; color:#2a4a2a; font-weight:500; line-height:1.6; background:#f0faf5; padding:8px 10px; border-radius:7px; margin-top:4px; }
+
+  /* ── 練習タブ：練習予定曲エリア ── */
+  .prac-song-area { background:white; border:1px solid #b8d0e8; border-radius:9px; padding:8px 12px; margin-bottom:8px; }
+  .prac-song-label { font-size:0.75rem; font-weight:700; letter-spacing:0.08em; color:#3a6ea8; margin-bottom:6px; }
+  .prac-song-list { display:flex; flex-wrap:wrap; gap:5px; }
+  .prac-song-chip { font-size:0.78rem; padding:3px 10px; border-radius:20px; background:#e8f0fa; border:1px solid #b8d0e8; color:#2a4a7a; font-weight:600; }
+
+  /* ── 練習タブ：ゲスト行 目立つデザイン ── */
+  .prac-guest-bar { background: linear-gradient(135deg,#1a3a6a,#2a5a8a); border:2px solid #5a9fd4; border-radius:9px; padding:7px 12px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+  .prac-guest-bar-icon { font-size:1.2rem; }
+  .prac-guest-bar-text { flex:1; font-size:0.82rem; color:#fff; font-weight:600; }
+
+  /* ── 練習タブ：パートヘッダー ── */
+  .prac-part-block { margin-bottom:10px; }
+  .prac-part-header { display:flex; align-items:center; gap:8px; padding:5px 10px; background:#2a2a4a; color:#d8d8f8; border-radius:7px; font-size:0.78rem; font-weight:700; }
+  .prac-part-name { flex:1; }
+  .prac-part-count { font-size:0.72rem; opacity:0.85; font-weight:500; }
+  .prac-member-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; padding:6px 4px 4px; }
 
   /* ── 施設名/部屋名 区切り線 ── */
   #room-btns { border-top: 1px solid var(--border); padding-top: 6px; margin-top: 2px; }
   #room-btns:empty { display:none!important; border:none; padding:0; }
 
-  /* ── 練習タブ：4列グリッド ── */
-  .prac-member-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; padding:6px 4px 4px; }
+  /* ── 部屋ボタン（クリーム色） ── */
+  .room-sel-btn { font-size:0.75rem; padding:4px 10px; border-radius:7px; border:1px solid #d4b870; background:#fef8e4; color:#7a5a00; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+  .room-sel-btn.active { background:#e8c830; color:#3a2a00; border-color:#b09000; font-weight:600; }
 
-  /* ── 練習タブ：メンバーボタン ── */
-  .prac-member-row { border-radius:6px; border:1.5px solid transparent; padding:4px 6px; }
-  .prac-member-row.s-present   { background:#ddf0e6; border-color:#2a6040; }
-  .prac-member-row.s-absent    { background:#f5e0e0; border-color:#8b2020; opacity:0.7; }
-  .prac-member-row.s-undecided { background:#e8e8e8; border-color:#aaa; opacity:0.8; }
+  /* ── 施設アコーディオン（drag handle付き） ── */
+  .venue-accordion { background: white; border-radius: 10px; margin-bottom: 8px; border: 1px solid #c8d8e8; overflow: hidden; box-shadow: var(--shadow); }
+  .venue-accordion-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; user-select: none; background: #e8f0f8; }
+  .venue-accordion-name { flex: 1; font-size: 0.88rem; font-weight: 700; color: #2a4a6a; }
+  .venue-accordion-arrow { font-size: 0.6rem; color: #5a7a9a; transition: transform 0.22s; }
+  .venue-accordion.open .venue-accordion-arrow { transform: rotate(90deg); }
+  .venue-accordion-body { display: none; padding: 8px 10px; }
+  .venue-accordion.open .venue-accordion-body { display: block; }
 
-  /* ── 練習タブ：コメント一覧 目立つラベル ── */
-  .prac-comment-bar-label { flex:1; font-size:0.85rem; font-weight:700; color:#fff; }
-  .prac-comment-bar { background: #3a3a3a; border:none; }
-  .prac-comment-bar-arrow { color:#ccc; }
+  /* ── 施設ドラッグハンドル ── */
+  .venue-drag-handle { width:24px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:grab; opacity:0.4; touch-action:none; padding:4px 0; }
+  .venue-drag-handle span { display:block; width:12px; height:2px; background:#5a7a9a; border-radius:1px; }
 
-  /* ── 練習タブ：コメントフキダシ ── */
-  .prac-comment-popup-inner { background:#fff; border:2px solid var(--ink); }
-  .prac-comment-popup-name { color: var(--ink); }
-  .prac-comment-popup-text { color: #333; font-weight:500; }
+  /* ── パートヘッダー（メンバーリスト用） ── */
+  .part-accordion-header { background: #e8eef4; }
+  .part-accordion-name { color: #2a4060; }
 
-  /* ── 練習タブ：練習予定曲エリア ── */
-  .prac-song-area { background:white; border:1px solid var(--border); border-radius:9px; padding:8px 12px; margin-bottom:8px; }
-  .prac-song-label { font-size:0.75rem; font-weight:700; letter-spacing:0.08em; color:var(--muted); margin-bottom:6px; text-transform:uppercase; }
-  .prac-song-list { display:flex; flex-wrap:wrap; gap:5px; }
-  .prac-song-chip { font-size:0.78rem; padding:3px 10px; border-radius:20px; background:var(--cream); border:1px solid var(--border); color:var(--ink); font-weight:500; }
+  /* ── 出欠登録タブ：コメント欄常時表示 ── */
+  .att-comment-row { display: flex; align-items: center; gap: 5px; margin-top: 4px; }
+  .att-comment-row .att-comment-bubble { display:none; }
+  .att-comment { font-family: inherit; font-size: 0.75rem; padding: 3px 8px; border: 1px solid var(--border); border-radius: 5px; flex: 1; background: rgba(255,255,255,0.8); color: var(--ink); outline: none; }
+  .att-comment:focus { border-color: #2e7d5a; background: white; }
 
-  /* ── 練習タブ：ゲスト行 目立つデザイン ── */
-  .prac-guest-bar { background: linear-gradient(135deg,#1a3a6a,#2a5a8a); border:2px solid #4a8abf; border-radius:9px; padding:7px 12px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
-  .prac-guest-bar-icon { font-size:1.2rem; }
-  .prac-guest-bar-text { flex:1; font-size:0.82rem; color:#fff; font-weight:600; }
-
-  /* ── コメント一覧の折りたたみ ── */
-  .prac-comment-list { background:#f8f8f8; border:1px solid #ddd; }
-
-  /* ── 練習日が閉じている時のサマリー ── */
-  .practice-summary-bar { background:white; border:1px solid var(--border); border-radius:9px; padding:10px 14px; margin-bottom:8px; display:none; }
+  /* ── サマリーバー ── */
+  .practice-summary-bar { background:white; border:1px solid #b8d0e8; border-left:4px solid #3a6ea8; border-radius:9px; padding:10px 14px; margin-bottom:8px; display:none; }
   .practice-summary-bar.visible { display:block; }
-  .practice-summary-date { font-size:0.88rem; font-weight:700; color:var(--ink); margin-bottom:4px; }
+  .practice-summary-date { font-size:0.88rem; font-weight:700; color:var(--ink); margin-bottom:3px; }
   .practice-summary-meta { font-size:0.78rem; color:var(--muted); }
-  .practice-summary-comment { font-size:0.82rem; font-weight:700; color:#c0392b; margin-top:4px; }</style>
+  .practice-summary-comment { font-size:0.82rem; font-weight:700; color:#b04000; margin-top:3px; }</style>
 </head>
 <body>
 
@@ -518,12 +538,6 @@
     <div class="practice-summary-comment" id="psum-comment"></div>
   </div>
   <div id="attendance-section" style="display:none">
-    <!-- コメント一覧 -->
-    <div id="prac-comment-bar" class="prac-comment-bar" onclick="togglePracComments()">
-      <span class="prac-comment-bar-label">💬 コメント一覧</span>
-      <span class="prac-comment-bar-arrow">▶</span>
-    </div>
-    <div id="prac-comment-list" class="prac-comment-list" style="display:none"></div>
     <!-- 練習予定曲 -->
     <div id="prac-song-area" class="prac-song-area" style="display:none">
       <div class="prac-song-label">🎵 練習予定曲</div>
@@ -534,6 +548,12 @@
       <span class="prac-guest-bar-icon">🎟️</span>
       <span class="prac-guest-bar-text" id="prac-guest-bar-text"></span>
     </div>
+    <!-- コメント一覧 -->
+    <div id="prac-comment-bar" class="prac-comment-bar" onclick="togglePracComments()">
+      <span class="prac-comment-bar-label">💬 コメント一覧</span>
+      <span class="prac-comment-bar-arrow">▶</span>
+    </div>
+    <div id="prac-comment-list" class="prac-comment-list" style="display:none"></div>
     <!-- パート別出欠 -->
     <div id="prac-att-list"></div>
   </div>
@@ -1532,8 +1552,9 @@ function renderVenueList() {
   const el=document.getElementById('venue-list'); if(!el) return;
   if(!data.venues.length){el.innerHTML='<div class="empty-state" style="font-size:0.8rem;padding:8px 0">施設がありません</div>';return;}
   el.innerHTML=data.venues.map(v=>`
-    <div class="venue-accordion${document.getElementById('vacc-'+v.id)?.classList.contains('open')?' open':''}" id="vacc-${v.id}">
+    <div class="venue-accordion drag-item${document.getElementById('vacc-'+v.id)?.classList.contains('open')?' open':''}" id="vacc-${v.id}" data-did="${v.id}">
       <div class="venue-accordion-header" id="venue-header-${v.id}" onclick="toggleVenueAccordion('${v.id}')">
+        <div class="venue-drag-handle" onclick="event.stopPropagation()"><span></span><span></span><span></span></div>
         <span class="venue-accordion-name">${esc(v.name)}</span>
         <button class="btn btn-sm btn-ghost" onclick="startEditVenue('${v.id}');event.stopPropagation()" style="font-size:0.68rem;padding:3px 8px">編集</button>
         <button class="btn btn-sm btn-danger" onclick="deleteVenue('${v.id}');event.stopPropagation()" style="font-size:0.68rem;padding:3px 8px">削除</button>
@@ -1556,7 +1577,14 @@ function renderVenueList() {
         </div>
       </div>
     </div>`).join('');
-  initDrag(el,()=>data.venues,v=>{data.venues=v;},()=>{renderVenueList();renderVenueBtns();});
+  // 施設ドラッグ：drag-handleを使った initDrag
+  el.querySelectorAll('[data-did]').forEach(item => {
+    const h = item.querySelector('.venue-drag-handle');
+    if(!h) return;
+    ['mousedown','touchstart'].forEach(ev =>
+      h.addEventListener(ev, e => startDrag(e, item, el, ()=>data.venues, v=>{data.venues=v;}, ()=>{renderVenueList();renderVenueBtns();}), {passive:false})
+    );
+  });
 }
 function toggleVenueAccordion(id) {
   const el=document.getElementById('vacc-'+id); if(el) el.classList.toggle('open');
@@ -1683,7 +1711,7 @@ function selectPracticeDate(dateId) {
 
 // ── 出欠ラベル helper ──
 function attLabel(status) {
-  return status==='present'?'◯': status==='absent'?'✕':'△';
+  return status==='present'?'◯': status==='absent'?'✕': status==='maybe'?'△':'－';
 }
 // ── 出欠状態: present / absent / undecided + comment ──
 // attendance[dateId][memberId] = {status:'present'|'absent'|'undecided', comment:''}
@@ -1716,9 +1744,8 @@ function setAttRecord(memberId, status, comment) {
 
 function toggleAttendance(memberId) {
   const cur  = attStatus(memberId);
-  const next = cur==='undecided'?'present': cur==='present'?'absent':'undecided';
+  const next = cur==='undecided'?'present': cur==='present'?'maybe': cur==='maybe'?'absent':'undecided';
   setAttRecord(memberId, next, undefined);
-  // カードのクラスとバッジを即時更新（is-guestクラスを保持）
   const card  = document.getElementById('admin-att-card-'+memberId); if(!card) return;
   const badge = card.querySelector('.att-badge'); if(!badge) return;
   const label = attLabel(next);
@@ -1842,12 +1869,10 @@ function buildBulkRow(d, memberId, setBulkFn) {
   });
 
   const dBtn = document.createElement('button');
-  dBtn.className = 'bulk-att-btn ' + (st==='undecided'?'undecided':'undecided') + (st==='undecided'?' active-undecided':'');
-  dBtn.style.cssText = st==='undecided' ? 'background:#c8bfaa;color:white;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:5px;border:none;cursor:pointer;font-family:inherit;min-width:44px;text-align:center' : '';
   dBtn.textContent = '△';
   dBtn.addEventListener('click', function(e){
     e.stopPropagation();
-    _setBulkAttStatus(d.id, memberId, 'undecided', this, setBulkFn);
+    _setBulkAttStatus(d.id, memberId, 'maybe', this, setBulkFn);
   });
 
   const aBtn = document.createElement('button');
@@ -1860,9 +1885,9 @@ function buildBulkRow(d, memberId, setBulkFn) {
 
   // 初期表示の色を正しく設定
   [pBtn, dBtn, aBtn].forEach(b => b.className = 'bulk-att-btn undecided');
-  if(st === 'present')   pBtn.className = 'bulk-att-btn present';
-  else if(st === 'absent') aBtn.className = 'bulk-att-btn absent';
-  else dBtn.className = 'bulk-att-btn undecided'; // △はundecidedスタイル
+  if(st === 'present')  pBtn.className = 'bulk-att-btn present';
+  else if(st === 'maybe')    dBtn.className = 'bulk-att-btn maybe';
+  else if(st === 'absent')   aBtn.className = 'bulk-att-btn absent';
 
   right.appendChild(cbtn);
   right.appendChild(pBtn);
@@ -1873,25 +1898,24 @@ function buildBulkRow(d, memberId, setBulkFn) {
   return div;
 }
 
-// 一括出欠ステータス設定（ポップアップ・グリッド共通）
 function _setBulkAttStatus(dateId, memberId, newStatus, btn, setBulkFn) {
   if(!data.attendance[dateId]) data.attendance[dateId] = {};
   const existing = data.attendance[dateId][memberId];
   const old = !existing ? {status:'undecided',comment:''}
     : typeof existing==='string' ? {status:existing,comment:''}
     : {status:existing.status||'undecided', comment:existing.comment||''};
-  // 同じ状態を押したらundecidedに戻す（△押しはそのままundecided）
+  // 同じ状態を押したらundecidedに戻す（undecided押しはundecidedのまま）
   const nextStatus = (old.status === newStatus && newStatus !== 'undecided') ? 'undecided' : newStatus;
   data.attendance[dateId][memberId] = { status: nextStatus, comment: old.comment };
   saveData();
-  // ボタン色を即時更新
+  // ボタン色を即時更新（◯=0, △=1, ✕=2）
   const row = btn.closest('.bulk-date-row');
   if(row) {
     const btns = row.querySelectorAll('.bulk-att-btn');
     btns.forEach(b => b.className = 'bulk-att-btn undecided');
     if(nextStatus === 'present')  btns[0].className = 'bulk-att-btn present';
-    else if(nextStatus === 'absent') btns[2].className = 'bulk-att-btn absent';
-    // △はundecidedなのでデフォルト色のまま
+    else if(nextStatus === 'maybe')   btns[1].className = 'bulk-att-btn maybe';
+    else if(nextStatus === 'absent')  btns[2].className = 'bulk-att-btn absent';
   }
   if(dateId === selectedDateId) renderAdminAttendanceGrid();
 }
@@ -2090,7 +2114,10 @@ function renderAdminAttendanceGrid() {
     html += '</div>';
   });
 
-  html += `<div class="guest-add-row"><button class="btn-guest" onclick="addGuest()">＋ ゲスト追加</button></div>`;
+  // ゲスト追加ボタンを最上部に配置
+  html = `<div class="guest-add-row" style="margin-bottom:10px;margin-top:0">`
+       + `<button class="btn-guest" onclick="addGuest()">＋ ゲスト追加</button></div>`
+       + html;
   el.innerHTML = html;
 
   // ゲスト編集・削除ボタンのイベントデリゲーション
@@ -2110,19 +2137,23 @@ function renderAdminAttendanceGrid() {
 
 function addGuest() {
   if(!selectedDateId) return;
-  // インラインフォームをゲスト追加ボタンの位置に追加
   const addRow = document.querySelector('.guest-add-row');
   if(!addRow) return;
-  if(addRow.querySelector('.guest-add-form')) return; // 既に開いている
+  if(addRow.querySelector('.guest-add-form')) return;
+  // パートのセレクトオプション生成
+  const partOpts = data.parts.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
   const form = document.createElement('div');
   form.className = 'guest-add-form';
-  form.style.cssText = 'display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--cream);border-radius:8px;margin-bottom:8px';
+  form.style.cssText = 'display:flex;flex-direction:column;gap:6px;padding:10px;background:#e8f4fd;border:1.5px solid #5a9fd4;border-radius:8px;margin-bottom:8px';
   form.innerHTML = `
-    <div style="font-size:0.75rem;font-weight:700;color:var(--ink);margin-bottom:2px">👤 ゲスト追加</div>
-    <input type="text" class="guest-part-input" placeholder="パート名（例：Violin）" style="font-size:0.82rem;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;background:white;color:var(--ink)"/>
-    <input type="text" class="guest-name-input" placeholder="名前（必須）" style="font-size:0.82rem;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:inherit;background:white;color:var(--ink)"/>
+    <div style="font-size:0.75rem;font-weight:700;color:#1a4a7a;margin-bottom:2px">🎟️ ゲスト追加</div>
+    <select class="guest-part-select" style="font-size:0.82rem;padding:6px 10px;border:1px solid #9ac0e0;border-radius:6px;font-family:inherit;background:white;color:var(--ink)">
+      <option value="">パートを選択（任意）</option>
+      ${partOpts}
+    </select>
+    <input type="text" class="guest-name-input" placeholder="名前（必須）" style="font-size:0.82rem;padding:6px 10px;border:1px solid #9ac0e0;border-radius:6px;font-family:inherit;background:white;color:var(--ink)"/>
     <div style="display:flex;gap:6px">
-      <button onclick="submitGuest(this)" class="btn btn-primary btn-sm" style="flex:1">追加</button>
+      <button onclick="submitGuest(this)" class="btn btn-primary btn-sm" style="flex:1;background:#2a5a8a;color:white">追加</button>
       <button onclick="this.closest('.guest-add-form').remove()" class="btn btn-ghost btn-sm" style="flex:1">キャンセル</button>
     </div>`;
   addRow.insertBefore(form, addRow.firstChild);
@@ -2132,7 +2163,7 @@ function submitGuest(btn) {
   const form = btn.closest('.guest-add-form');
   if(!form) return;
   const name = form.querySelector('.guest-name-input').value.trim();
-  const part = form.querySelector('.guest-part-input').value.trim();
+  const part = form.querySelector('.guest-part-select').value;
   if(!name) { form.querySelector('.guest-name-input').focus(); return; }
   const gid = 'guest_' + Math.random().toString(36).substr(2,8);
   if(!data.attendance[selectedDateId]) data.attendance[selectedDateId] = {};
@@ -2140,6 +2171,8 @@ function submitGuest(btn) {
   saveData();
   form.remove();
   renderAdminAttendanceGrid();
+  // 練習タブも更新
+  if(document.getElementById('screen-practice').classList.contains('active')) renderPracticeAttendance();
 }
 
 function renameGuest(gid) {
@@ -2148,12 +2181,14 @@ function renameGuest(gid) {
   const oldName = (typeof rec==='object' && rec._name) ? rec._name : 'ゲスト';
   const oldPart = (typeof rec==='object' && rec._part) ? rec._part : '';
   const newName = prompt('ゲストの名前を変更', oldName);
-  if(!newName || !newName.trim()) return;
-  const newPart = prompt('パート名を変更', oldPart);
-  data.attendance[selectedDateId][gid]._name = newName.trim();
+  if(newName === null) return;
+  const partChoices = data.parts.map(p=>p.name).join(' / ');
+  const newPart = prompt('パートを変更' + (partChoices ? '\n（選択肢：' + partChoices + '）' : ''), oldPart);
+  if(newName.trim()) data.attendance[selectedDateId][gid]._name = newName.trim();
   data.attendance[selectedDateId][gid]._part = (newPart||'').trim();
   saveData();
   renderAdminAttendanceGrid();
+  if(document.getElementById('screen-practice').classList.contains('active')) renderPracticeAttendance();
 }
 
 function deleteGuest(gid) {
@@ -2213,7 +2248,6 @@ function renderPracticeAttendance() {
   const attObj = data.attendance[selectedDateId] || {};
   const dateObj = data.dates.find(d=>d.id===selectedDateId);
 
-  // 出欠ステータス取得helper（selectedDateId固定版）
   const getStatus = mid => {
     const v = attObj[mid];
     if(!v) return 'undecided';
@@ -2232,7 +2266,8 @@ function renderPracticeAttendance() {
     const rec = attObj[gid];
     const name = (typeof rec==='object' && rec._name) ? rec._name : 'ゲスト';
     const part = (typeof rec==='object' && rec._part) ? rec._part : '';
-    return {id:gid, name, part};
+    const status = (typeof rec==='object' && rec.status) ? rec.status : 'present';
+    return {id:gid, name, part, status};
   });
 
   // ゲストバー
@@ -2240,7 +2275,7 @@ function renderPracticeAttendance() {
   const guestBarText = document.getElementById('prac-guest-bar-text');
   if(guestBar && guestBarText) {
     if(guests.length) {
-      guestBarText.textContent = '🎟️ ゲスト：' + guests.map(g=>g.name+(g.part?'（'+g.part+'）':'')).join('　');
+      guestBarText.textContent = 'ゲスト：' + guests.map(g=>g.name+(g.part?'（'+g.part+'）':'')).join('　');
       guestBar.style.display='';
     } else {
       guestBar.style.display='none';
@@ -2277,47 +2312,85 @@ function renderPracticeAttendance() {
       ? allCommentItems.map(x =>
           `<div class="prac-comment-item"><span class="prac-comment-name">${esc(x.name)}</span><span class="prac-comment-text">${esc(x.comment)}</span></div>`
         ).join('')
-      : '<div style="font-size:0.8rem;color:var(--muted);padding:4px 0">コメントはありません</div>';
+      : '<div style="font-size:0.8rem;color:#2a6040;padding:4px 0">コメントはありません</div>';
   }
 
   // ── パート別出欠 ──
   const el = document.getElementById('prac-att-list'); if(!el) return;
   const partOrder = [{id:'',name:'未分類'}, ...data.parts];
-  const groups = {};
-  partOrder.forEach(p => { groups[p.id] = []; });
+
+  // メンバーをパートでグループ化
+  const memberGroups = {};
+  partOrder.forEach(p => { memberGroups[p.id] = []; });
   data.members.forEach(m => {
     const pid = (m.partId && data.parts.find(p=>p.id===m.partId)) ? m.partId : '';
-    if(!groups[pid]) groups[pid] = [];
-    groups[pid].push(m);
+    if(!memberGroups[pid]) memberGroups[pid] = [];
+    memberGroups[pid].push({...m, isGuest:false});
+  });
+
+  // ゲストをパートでグループ化（パート名 → part.id に変換）
+  const guestGroups = {};
+  guests.forEach(g => {
+    // パート名からIDを探す
+    const matchPart = data.parts.find(p=>p.name === g.part);
+    const pid = matchPart ? matchPart.id : '';
+    if(!guestGroups[pid]) guestGroups[pid] = [];
+    guestGroups[pid].push({id:g.id, name:g.name, isGuest:true, status:g.status});
   });
 
   el.innerHTML = partOrder.map(part => {
-    const members = groups[part.id] || [];
-    if(!members.length) return '';
+    const members = memberGroups[part.id] || [];
+    const guestsInPart = guestGroups[part.id] || [];
+    if(!members.length && !guestsInPart.length) return '';
+
     const presentCnt = members.filter(m => getStatus(m.id) === 'present').length;
-    const chips = members.map(m => {
+    const guestPresentCnt = guestsInPart.filter(g => g.status === 'present').length;
+    const totalGuests = guestsInPart.length;
+
+    // 人数表示：◯/全員 +ゲスト数
+    const countLabel = totalGuests
+      ? `${presentCnt}/${members.length} <span style="color:#5a9fd4;font-size:0.68rem">+${totalGuests}</span>`
+      : `${presentCnt}/${members.length}`;
+
+    // メンバーチップ
+    const memberChips = members.map(m => {
       const st  = getStatus(m.id);
       const sym = attLabel(st);
       const cmt = getComment(m.id);
-      const cmtIcon = cmt ? `<span class="prac-member-cmt-icon" title="${esc(cmt)}">💬</span>` : '';
+      const cmtIcon = cmt ? `<span class="prac-member-cmt-icon">💬</span>` : '';
       const cat = data.categories.find(c=>c.id===m.categoryId);
-      // ボタン様デザイン、出欠で色分け（CSSクラスで制御）
-      return `<div class="prac-member-row s-${st}" onclick="showPracComment('${m.id}','${esc(m.name)}',event)">
+      const bgColor = cat ? cat.bg : '#f0f0f0';
+      return `<div class="prac-member-row s-${st}" style="background:${bgColor}" onclick="showPracComment('${m.id}','${esc(m.name)}',event)">
         <span class="prac-member-sym s-${st}">${sym}</span>
         <span class="prac-member-name-cell">${esc(m.name)}</span>
         ${cmtIcon}
       </div>`;
     }).join('');
+
+    // ゲストチップ
+    const guestChips = guestsInPart.map(g => {
+      const sym = attLabel(g.status);
+      const cmt = getComment(g.id);
+      const cmtIcon = cmt ? `<span class="prac-member-cmt-icon">💬</span>` : '';
+      return `<div class="prac-member-row s-${g.status}" style="background:#ddeeff;border-style:dashed" onclick="showPracComment('${g.id}','${esc(g.name)}',event)">
+        <span class="prac-member-sym s-${g.status}">${sym}</span>
+        <span class="prac-member-name-cell" style="font-style:italic">${esc(g.name)}</span>
+        ${cmtIcon}
+      </div>`;
+    }).join('');
+
     return `<div class="prac-part-block">
       <div class="prac-part-header">
         <span class="prac-part-name">${esc(part.name)}</span>
-        <span class="prac-part-count">${presentCnt}/${members.length}</span>
+        <span class="prac-part-count">${countLabel}</span>
       </div>
-      <div class="prac-member-grid">${chips}</div>
+      <div class="prac-member-grid">${memberChips}${guestChips}</div>
     </div>`;
   }).join('');
 
-  // サマリーバー更新
+  // パートに入らないゲスト（パート未設定 or マッチしないパート）は「未分類」に既に含まれている
+  // ただし「未分類」グループ自体が空でも guestGroups[''] があれば表示済み
+
   updatePracticeSummaryBar();
 }
 
