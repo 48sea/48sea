@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>しばシー予定表</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
 <style>
@@ -199,6 +199,10 @@
   .collapsible-section.open .collapsible-body { display: block; }
   .collapsible-peek { font-size: 0.75rem; color: var(--sage); font-weight: 600; flex-shrink: 0; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+  /* ── ヘッダーリンクボタン ── */
+  .hdr-link-btn { display: inline-flex; align-items: center; gap: 3px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.82); font-size: 0.7rem; padding: 3px 9px; border-radius: 20px; text-decoration: none; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
+  .hdr-link-btn:hover { background: rgba(255,255,255,0.22); color: white; }
+
   /* ── ヘッダー送信ボタン ── */
   .hdr-push-btn { position: relative; background: none; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.55); font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; cursor: pointer; font-family: inherit; transition: all 0.2s; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
   .hdr-push-btn:hover { background: rgba(255,255,255,0.1); color: white; }
@@ -386,12 +390,12 @@
   .prac-comment-name { font-weight:700; flex-shrink:0; color:#1a5c3a; }
   .prac-comment-text { color:#2a6040; flex:1; }
 
-  /* ── 練習タブ：メンバーボタン（区分色背景 + 出欠色ボーダー） ── */
-  .prac-member-row { border-radius:6px; border:2px solid transparent; padding:3px 5px; cursor:pointer; user-select:none; position:relative; display:flex; align-items:center; gap:4px; transition:all 0.12s; }
-  .prac-member-row.s-present   { border-color: var(--btn-present); }
-  .prac-member-row.s-absent    { border-color: var(--btn-absent); opacity:0.75; }
-  .prac-member-row.s-maybe     { border-color: var(--btn-maybe); }
-  .prac-member-row.s-undecided { border-color: #aaaaaa; opacity:0.7; }
+  /* ── 練習タブ：メンバーボタン（出欠=背景色、区分=枠線色） ── */
+  .prac-member-row { border-radius:6px; border:3px solid transparent; padding:3px 5px; cursor:pointer; user-select:none; position:relative; display:flex; align-items:center; gap:4px; transition:all 0.12s; }
+  .prac-member-row.s-present   { background: var(--btn-present-bg); }
+  .prac-member-row.s-absent    { background: var(--btn-absent-bg);  opacity:0.82; }
+  .prac-member-row.s-maybe     { background: var(--btn-maybe-bg); }
+  .prac-member-row.s-undecided { background: var(--btn-none-bg); opacity:0.75; }
   /* 出欠シンボルの色 */
   .prac-member-sym { font-size:0.78rem; font-weight:700; flex-shrink:0; width:14px; text-align:center; }
   .prac-member-sym.s-present   { color: var(--btn-present); }
@@ -499,9 +503,10 @@
 
 <!-- ── HEADER ── -->
 <div class="app-header">
-  <h1>しばシー予定表 <span style="font-size:0.55rem;font-weight:400;opacity:0.5;letter-spacing:0.05em;vertical-align:middle">
-  v2.0</span></h1>
+  <h1>しばシー予定表 <span style="font-size:0.55rem;font-weight:400;opacity:0.5;letter-spacing:0.05em;vertical-align:middle">v2.0</span></h1>
   <div class="header-sync">
+    <a href="https://drive.google.com/drive/folders/1gI-0Cq9sPegeLAQSRFIUABJtn_W4_Jyy?usp=sharing" target="_blank" class="hdr-link-btn">📄 楽譜</a>
+    <a href="https://drive.google.com/drive/folders/1bRU_k-ceVoPCF2BQYcBW2ElX7RhEv5Fz?usp=sharing" target="_blank" class="hdr-link-btn">🎵 録音</a>
     <div class="sync-pill off" id="hdr-sync-pill">
       <div class="sync-dot"></div>
       <span id="hdr-sync-text">同期OFF</span>
@@ -738,11 +743,10 @@
       <button class="btn btn-primary" onclick="syncPush(true)" style="flex:1">📡 今すぐ送信</button>
     </div>
 
-    <!-- GAS URL -->
-    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--cream)">
-      <div style="font-size:0.75rem;font-weight:600;color:var(--muted);margin-bottom:6px">🔗 GAS ウェブアプリ URL</div>
-      <input type="text" id="gas-url" placeholder="https://script.google.com/macros/s/..." oninput="onGasUrlChange()" style="font-size:0.75rem"/>
-      <div id="url-saved-msg" style="font-size:0.72rem;color:var(--sage);margin-top:4px;display:none">✅ 保存しました</div>
+    <!-- GAS URL (ハードコード済みのため非表示) -->
+    <div style="display:none">
+      <input type="text" id="gas-url" oninput="onGasUrlChange()" />
+      <div id="url-saved-msg"></div>
     </div>
   </div>
 
@@ -916,7 +920,23 @@ function updatePracticeSummaryBar() {
   const d = data.dates.find(d=>d.id===selectedDateId);
   if(!d) { bar.classList.remove('visible'); return; }
   bar.classList.add('visible');
-  document.getElementById('psum-date').textContent = '📅 ' + fmtDate(d.date) + (d.time ? '　' + d.time : '');
+
+  // 人数集計
+  const attObj = data.attendance[selectedDateId] || {};
+  const getStatus = mid => {
+    const v = attObj[mid]; if(!v) return 'undecided';
+    return typeof v==='string' ? v : (v.status||'undecided');
+  };
+  const memberPresent = data.members.filter(m => getStatus(m.id)==='present').length;
+  const guests = Object.keys(attObj).filter(mid =>
+    !data.members.find(m=>m.id===mid) && mid.startsWith('guest_')
+  );
+  const guestPresent = guests.filter(gid => getStatus(gid)==='present').length;
+  const countText = guestPresent
+    ? `${memberPresent}/${data.members.length} +${guests.length}ゲスト`
+    : `${memberPresent}/${data.members.length}人参加`;
+
+  document.getElementById('psum-date').textContent = '📅 ' + fmtDate(d.date) + (d.time ? '　' + d.time : '') + '　👥 ' + countText;
   const meta = [d.place].filter(Boolean);
   document.getElementById('psum-meta').textContent = meta.join('　');
   document.getElementById('psum-comment').textContent = d.comment || '';
@@ -1731,13 +1751,15 @@ function setAttRecord(memberId, status, comment) {
   if(!data.attendance[selectedDateId]) data.attendance[selectedDateId] = {};
   const old = attRecord(memberId);
   const existing = data.attendance[selectedDateId][memberId];
-  // ゲストの _name フィールドを保持する
+  // ゲストの _name / _part フィールドを保持する
   const _name = (existing && typeof existing === 'object') ? existing._name : undefined;
+  const _part = (existing && typeof existing === 'object') ? existing._part : undefined;
   const newRec = {
     status:  status  !== undefined ? status  : old.status,
     comment: comment !== undefined ? comment : old.comment
   };
   if(_name !== undefined) newRec._name = _name;
+  if(_part !== undefined) newRec._part = _part;
   data.attendance[selectedDateId][memberId] = newRec;
   saveData();
 }
@@ -2072,8 +2094,7 @@ function renderAdminAttendanceGrid() {
           <button class="btn btn-sm btn-danger guest-delete-btn" data-gid="${esc(entry.id)}" style="padding:2px 7px;font-size:0.68rem">削除</button>
         </div>
         <div class="att-comment-row">
-          <span class="att-comment-bubble">💬</span>
-          <input class="att-comment" type="text" placeholder="コメント" value="${esc(rec.comment)}"
+          <input class="att-comment" type="text" placeholder="コメント（任意）" value="${esc(rec.comment)}"
             oninput="setAttComment('${entry.id}',this.value)" onclick="event.stopPropagation()" />
         </div>
       </div>`;
@@ -2105,8 +2126,7 @@ function renderAdminAttendanceGrid() {
           <span class="att-member-name att-member-longpress" data-member-id="${entry.id}" style="cursor:pointer">${esc(entry.name)}</span>
         </div>
         <div class="att-comment-row">
-          <span class="att-comment-bubble">💬</span>
-          <input class="att-comment" type="text" placeholder="コメント" value="${esc(rec.comment)}"
+          <input class="att-comment" type="text" placeholder="コメント（任意）" value="${esc(rec.comment)}"
             oninput="setAttComment('${entry.id}',this.value)" onclick="event.stopPropagation()" />
         </div>
       </div>`;
@@ -2140,38 +2160,54 @@ function addGuest() {
   const addRow = document.querySelector('.guest-add-row');
   if(!addRow) return;
   if(addRow.querySelector('.guest-add-form')) return;
+  // ボタン自体を非表示
+  const guestBtn = addRow.querySelector('.btn-guest');
+  if(guestBtn) guestBtn.style.display = 'none';
   // パートのセレクトオプション生成
   const partOpts = data.parts.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
   const form = document.createElement('div');
   form.className = 'guest-add-form';
-  form.style.cssText = 'display:flex;flex-direction:column;gap:6px;padding:10px;background:#e8f4fd;border:1.5px solid #5a9fd4;border-radius:8px;margin-bottom:8px';
+  form.style.cssText = 'display:flex;flex-direction:column;gap:6px;padding:10px;background:#e8f4fd;border:1.5px solid #5a9fd4;border-radius:8px;margin-bottom:8px;width:100%';
   form.innerHTML = `
     <div style="font-size:0.75rem;font-weight:700;color:#1a4a7a;margin-bottom:2px">🎟️ ゲスト追加</div>
-    <select class="guest-part-select" style="font-size:0.82rem;padding:6px 10px;border:1px solid #9ac0e0;border-radius:6px;font-family:inherit;background:white;color:var(--ink)">
-      <option value="">パートを選択（任意）</option>
+    <select class="guest-part-select" required style="font-size:0.82rem;padding:6px 10px;border:1px solid #9ac0e0;border-radius:6px;font-family:inherit;background:white;color:var(--ink)">
+      <option value="">▼ パートを選択（必須）</option>
       ${partOpts}
     </select>
     <input type="text" class="guest-name-input" placeholder="名前（必須）" style="font-size:0.82rem;padding:6px 10px;border:1px solid #9ac0e0;border-radius:6px;font-family:inherit;background:white;color:var(--ink)"/>
     <div style="display:flex;gap:6px">
       <button onclick="submitGuest(this)" class="btn btn-primary btn-sm" style="flex:1;background:#2a5a8a;color:white">追加</button>
-      <button onclick="this.closest('.guest-add-form').remove()" class="btn btn-ghost btn-sm" style="flex:1">キャンセル</button>
+      <button onclick="cancelGuestForm(this)" class="btn btn-ghost btn-sm" style="flex:1">キャンセル</button>
     </div>`;
   addRow.insertBefore(form, addRow.firstChild);
   form.querySelector('.guest-name-input').focus();
+}
+function cancelGuestForm(btn) {
+  const form = btn.closest('.guest-add-form');
+  if(form) form.remove();
+  // ボタンを再表示
+  const addRow = document.querySelector('.guest-add-row');
+  if(addRow) {
+    const guestBtn = addRow.querySelector('.btn-guest');
+    if(guestBtn) guestBtn.style.display = '';
+  }
 }
 function submitGuest(btn) {
   const form = btn.closest('.guest-add-form');
   if(!form) return;
   const name = form.querySelector('.guest-name-input').value.trim();
   const part = form.querySelector('.guest-part-select').value;
+  if(!part) { form.querySelector('.guest-part-select').focus(); showToast('⚠️ パートを選択してください', 2000); return; }
   if(!name) { form.querySelector('.guest-name-input').focus(); return; }
   const gid = 'guest_' + Math.random().toString(36).substr(2,8);
   if(!data.attendance[selectedDateId]) data.attendance[selectedDateId] = {};
   data.attendance[selectedDateId][gid] = { status:'present', comment:'', _name: name, _part: part };
   saveData();
   form.remove();
+  // ボタンを再表示してからグリッド再描画
+  const addRow = document.querySelector('.guest-add-row');
+  if(addRow) { const b=addRow.querySelector('.btn-guest'); if(b) b.style.display=''; }
   renderAdminAttendanceGrid();
-  // 練習タブも更新
   if(document.getElementById('screen-practice').classList.contains('active')) renderPracticeAttendance();
 }
 
@@ -2359,8 +2395,9 @@ function renderPracticeAttendance() {
       const cmt = getComment(m.id);
       const cmtIcon = cmt ? `<span class="prac-member-cmt-icon">💬</span>` : '';
       const cat = data.categories.find(c=>c.id===m.categoryId);
-      const bgColor = cat ? cat.bg : '#f0f0f0';
-      return `<div class="prac-member-row s-${st}" style="background:${bgColor}" onclick="showPracComment('${m.id}','${esc(m.name)}',event)">
+      // 区分のfg色を枠線色に使う（太枠3px）
+      const borderStyle = cat ? `border-color:${cat.fg}` : '';
+      return `<div class="prac-member-row s-${st}" style="${borderStyle}" onclick="showPracComment('${m.id}','${esc(m.name)}',event)">
         <span class="prac-member-sym s-${st}">${sym}</span>
         <span class="prac-member-name-cell">${esc(m.name)}</span>
         ${cmtIcon}
