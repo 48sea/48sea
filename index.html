@@ -295,11 +295,9 @@
     transition: opacity 0.15s; }
   .bulk-comment-btn:hover { opacity: 0.8; }
   .bulk-comment-btn.has-comment { opacity: 1; color: var(--gold); }
-  .bulk-comment-wrap { display: none; padding: 4px 0 6px 0; }
-  .bulk-comment-wrap.open { display: block; }
   .bulk-comment-input { font-family: 'Noto Sans JP', sans-serif; font-size: 0.78rem;
-    padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
-    width: 100%; background: var(--paper); color: var(--ink); outline: none; }
+    padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px;
+    width: 100%; background: var(--paper); color: var(--ink); outline: none; margin-top: 4px; display: block; }
   .bulk-comment-input:focus { border-color: var(--gold); }
 
   /* ── 出欠登録 ラジオ+リストボックス行 ── */
@@ -464,9 +462,37 @@
   .practice-summary-bar.visible { display:block; }
   .practice-summary-date { font-size:0.88rem; font-weight:700; color:var(--ink); margin-bottom:3px; }
   .practice-summary-meta { font-size:0.78rem; color:var(--muted); }
-  .practice-summary-comment { font-size:0.82rem; font-weight:700; color:#b04000; margin-top:3px; }</style>
+  .practice-summary-comment { font-size:0.82rem; font-weight:700; color:#b04000; margin-top:3px; }  /* ── パスワードモーダル ── */
+  .pw-modal-bg { position:fixed; inset:0; background:rgba(26,26,46,0.75); z-index:600; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .pw-modal-bg.hidden { display:none; }
+  .pw-modal { background:var(--paper); border-radius:16px; padding:28px 22px 24px; max-width:340px; width:100%; box-shadow:0 8px 40px rgba(0,0,0,0.4); animation:slideUp 0.25s ease; }
+  .pw-modal-icon { font-size:2rem; text-align:center; margin-bottom:8px; }
+  .pw-modal-title { font-size:1rem; font-weight:700; text-align:center; margin-bottom:6px; }
+  .pw-modal-sub { font-size:0.8rem; color:var(--muted); text-align:center; margin-bottom:16px; }
+  .pw-modal-error { font-size:0.78rem; color:var(--absent); text-align:center; margin-bottom:8px; font-weight:600; display:none; }
+  .pw-modal input { font-family:'Noto Sans JP',sans-serif; font-size:1.1rem; padding:10px 14px; border:2px solid var(--border); border-radius:9px; width:100%; text-align:center; letter-spacing:0.3em; outline:none; margin-bottom:12px; }
+  .pw-modal input:focus { border-color:#3a6ea8; }
+  .pw-modal-btns { display:flex; gap:8px; }
+  .pw-modal-btns .btn { flex:1; padding:10px; font-size:0.88rem; }
+</style>
 </head>
 <body>
+
+<!-- ── パスワードモーダル ── -->
+<div id="pw-modal-bg" class="pw-modal-bg hidden">
+  <div class="pw-modal">
+    <div class="pw-modal-icon">🔐</div>
+    <div class="pw-modal-title">基本登録</div>
+    <div class="pw-modal-sub">パスワードを入力してください</div>
+    <div class="pw-modal-error" id="pw-error">パスワードが違います</div>
+    <input type="password" id="pw-input" placeholder="••••" maxlength="10"
+      onkeydown="if(event.key==='Enter')submitPassword()" />
+    <div class="pw-modal-btns">
+      <button class="btn btn-ghost" onclick="dismissPasswordModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="submitPassword()">確認</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── 競合確認モーダル ── -->
 <div id="conflict-modal-bg" class="conflict-modal-bg hidden">
@@ -505,8 +531,8 @@
 <div class="app-header">
   <h1>しばシー予定表 <span style="font-size:0.55rem;font-weight:400;opacity:0.5;letter-spacing:0.05em;vertical-align:middle">v2.0</span></h1>
   <div class="header-sync">
-    <a href="https://drive.google.com/drive/folders/1gI-0Cq9sPegeLAQSRFIUABJtn_W4_Jyy?usp=sharing" target="_blank" class="hdr-link-btn">📄 楽譜</a>
-    <a href="https://drive.google.com/drive/folders/1bRU_k-ceVoPCF2BQYcBW2ElX7RhEv5Fz?usp=sharing" target="_blank" class="hdr-link-btn">🎵 録音</a>
+    <a id="hdr-link-score" href="https://drive.google.com/drive/folders/1gI-0Cq9sPegeLAQSRFIUABJtn_W4_Jyy?usp=sharing" target="_blank" class="hdr-link-btn">📄 楽譜</a>
+    <a id="hdr-link-rec"   href="https://drive.google.com/drive/folders/1bRU_k-ceVoPCF2BQYcBW2ElX7RhEv5Fz?usp=sharing" target="_blank" class="hdr-link-btn">🎵 録音</a>
     <div class="sync-pill off" id="hdr-sync-pill">
       <div class="sync-dot"></div>
       <span id="hdr-sync-text">同期OFF</span>
@@ -700,6 +726,26 @@
         <button class="btn btn-primary" onclick="addSong()">追加</button>
       </div>
       <div id="song-list"></div>
+    </div>
+    <!-- リンク設定 -->
+    <div class="section">
+      <div class="section-title">🔗 ヘッダーリンク設定</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div style="font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:4px">📄 楽譜リンク URL</div>
+          <div style="display:flex;gap:6px">
+            <input type="text" id="link-score-url" placeholder="https://..." style="font-size:0.78rem;flex:1" oninput="saveLinkUrl('score',this.value)"/>
+            <a id="link-score-test" href="#" target="_blank" class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="return testLink('score')">確認</a>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:4px">🎵 録音リンク URL</div>
+          <div style="display:flex;gap:6px">
+            <input type="text" id="link-rec-url" placeholder="https://..." style="font-size:0.78rem;flex:1" oninput="saveLinkUrl('rec',this.value)"/>
+            <a id="link-rec-test" href="#" target="_blank" class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="return testLink('rec')">確認</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -944,6 +990,14 @@ function updatePracticeSummaryBar() {
 
 
 function switchTab(name, btn) {
+  // 基本登録タブはパスワード保護
+  if(name === 'data') {
+    checkDataPassword(() => _doSwitchTab(name, btn));
+    return;
+  }
+  _doSwitchTab(name, btn);
+}
+function _doSwitchTab(name, btn) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
@@ -953,13 +1007,11 @@ function switchTab(name, btn) {
     renderPracticeDates();
     if(selectedDateId) renderPracticeAttendance();
   }
-
   if (name==='admin') {
     switchAttTab('att', document.getElementById('atab-att'));
     renderVenueBtns();
   }
   if (name==='data') {
-    // 基本登録タブ：最後のサブタブを復元
     const lastDSub = localStorage.getItem('ensemble_last_dtab') || 'member';
     const dBtn = document.getElementById('dtab-'+lastDSub);
     switchDataTab(lastDSub, dBtn || document.getElementById('dtab-member'));
@@ -1004,7 +1056,7 @@ function switchDataTab(name, btn) {
   if(el) el.classList.add('active');
   localStorage.setItem('ensemble_last_dtab', name);
   if(name==='member') { renderMemberList(); renderPartList(); renderCategoryList(); }
-  if(name==='song')   renderSongList();
+  if(name==='song')   { renderSongList(); initLinkSettings(); }
   if(name==='venue')  renderVenueList();
   if(name==='sync')   initGasCodeBlock();
 }
@@ -1768,12 +1820,15 @@ function toggleAttendance(memberId) {
   const cur  = attStatus(memberId);
   const next = cur==='undecided'?'present': cur==='present'?'maybe': cur==='maybe'?'absent':'undecided';
   setAttRecord(memberId, next, undefined);
+  // カードのクラスとバッジを即時更新（is-guestクラスを保持）
   const card  = document.getElementById('admin-att-card-'+memberId); if(!card) return;
   const badge = card.querySelector('.att-badge'); if(!badge) return;
   const label = attLabel(next);
   const isGuest = card.classList.contains('is-guest');
   card.className = 'att-card s-'+next + (isGuest ? ' is-guest' : '');
   badge.textContent = label;
+  // ゲストの場合は全体再描画でpart情報も正しく反映
+  if(isGuest) renderAdminAttendanceGrid();
 }
 function setAttComment(memberId, comment) {
   setAttRecord(memberId, undefined, comment);
@@ -1851,36 +1906,26 @@ function buildBulkRow(d, memberId, setBulkFn) {
   div.className = 'bulk-date-row';
   div.id = rowId;
 
-  // 左側：日付ラベル＋コメント欄
+  // 左側：日付ラベル＋コメント欄（常時表示）
   const left = document.createElement('div');
   left.style.cssText = 'flex:1;min-width:0';
   const label = document.createElement('div');
   label.className = 'bulk-date-label';
   label.innerHTML = provTag + fmtDate(d.date) + (d.memo ? '<div class="bulk-date-memo">' + esc(d.memo) + '</div>' : '');
-  const cwrap = document.createElement('div');
-  cwrap.className = 'bulk-comment-wrap' + (comment ? ' open' : '');
   const cinp = document.createElement('input');
   cinp.className = 'bulk-comment-input';
   cinp.type = 'text';
-  cinp.placeholder = 'コメント';
+  cinp.placeholder = 'コメント（任意）';
   cinp.value = comment;
   cinp.dataset.dateId   = d.id;
   cinp.dataset.memberId = memberId;
   cinp.addEventListener('input', function(){ saveBulkComment(this.dataset.dateId, this.dataset.memberId, this.value); });
-  cwrap.appendChild(cinp);
   left.appendChild(label);
-  left.appendChild(cwrap);
+  left.appendChild(cinp);
 
-  // 右側：コメントボタン＋出欠ボタン（◯△✕）
+  // 右側：出欠ボタン（◯△✕）のみ
   const right = document.createElement('div');
   right.style.cssText = 'display:flex;align-items:center;gap:4px;flex-shrink:0';
-
-  const cbtn = document.createElement('button');
-  cbtn.className = 'bulk-comment-btn' + (comment ? ' has-comment' : '');
-  cbtn.textContent = comment ? '💬!' : '💬';
-  cbtn.title = 'コメント';
-  cbtn.dataset.rowId = rowId;
-  cbtn.addEventListener('click', function(){ toggleBulkComment(this.dataset.rowId); });
 
   const pBtn = document.createElement('button');
   pBtn.className = 'bulk-att-btn ' + (st==='present'?'present':'undecided');
@@ -1911,7 +1956,6 @@ function buildBulkRow(d, memberId, setBulkFn) {
   else if(st === 'maybe')    dBtn.className = 'bulk-att-btn maybe';
   else if(st === 'absent')   aBtn.className = 'bulk-att-btn absent';
 
-  right.appendChild(cbtn);
   right.appendChild(pBtn);
   right.appendChild(dBtn);
   right.appendChild(aBtn);
@@ -2528,7 +2572,82 @@ function importTxt(event) {
 }
 
 // ══════════════════════════════════════════════════════
-// GAS AUTO SYNC
+// ヘッダーリンク設定
+// ══════════════════════════════════════════════════════
+const LINK_SCORE_KEY = 'ensemble_link_score';
+const LINK_REC_KEY   = 'ensemble_link_rec';
+const DEFAULT_SCORE_URL = 'https://drive.google.com/drive/folders/1gI-0Cq9sPegeLAQSRFIUABJtn_W4_Jyy?usp=sharing';
+const DEFAULT_REC_URL   = 'https://drive.google.com/drive/folders/1bRU_k-ceVoPCF2BQYcBW2ElX7RhEv5Fz?usp=sharing';
+
+function getLinkUrl(type) {
+  const key = type==='score' ? LINK_SCORE_KEY : LINK_REC_KEY;
+  const def  = type==='score' ? DEFAULT_SCORE_URL : DEFAULT_REC_URL;
+  return localStorage.getItem(key) || def;
+}
+function saveLinkUrl(type, url) {
+  const key = type==='score' ? LINK_SCORE_KEY : LINK_REC_KEY;
+  localStorage.setItem(key, url.trim() || (type==='score' ? DEFAULT_SCORE_URL : DEFAULT_REC_URL));
+  applyHeaderLinks();
+}
+function testLink(type) {
+  const url = getLinkUrl(type);
+  if(url) window.open(url, '_blank');
+  return false;
+}
+function applyHeaderLinks() {
+  const scoreEl = document.getElementById('hdr-link-score');
+  const recEl   = document.getElementById('hdr-link-rec');
+  if(scoreEl) scoreEl.href = getLinkUrl('score');
+  if(recEl)   recEl.href   = getLinkUrl('rec');
+}
+function initLinkSettings() {
+  const scoreInp = document.getElementById('link-score-url');
+  const recInp   = document.getElementById('link-rec-url');
+  if(scoreInp) scoreInp.value = getLinkUrl('score');
+  if(recInp)   recInp.value   = getLinkUrl('rec');
+}
+// ══════════════════════════════════════════════════════
+// 基本登録タブ パスワード保護
+// ══════════════════════════════════════════════════════
+const DATA_PASS_KEY = 'ensemble_data_unlocked';
+const DATA_PASSWORD = '48';
+
+function isDataUnlocked() {
+  return localStorage.getItem(DATA_PASS_KEY) === '1';
+}
+function unlockData() {
+  localStorage.setItem(DATA_PASS_KEY, '1');
+}
+function checkDataPassword(onSuccess) {
+  if(isDataUnlocked()) { onSuccess(); return; }
+  // パスワードモーダルを表示
+  const bg = document.getElementById('pw-modal-bg');
+  if(bg) {
+    bg.classList.remove('hidden');
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-error').style.display = 'none';
+    setTimeout(()=>document.getElementById('pw-input').focus(), 100);
+    // コールバックを保持
+    window._pwCallback = onSuccess;
+  }
+}
+function submitPassword() {
+  const val = document.getElementById('pw-input').value;
+  if(val === DATA_PASSWORD) {
+    unlockData();
+    document.getElementById('pw-modal-bg').classList.add('hidden');
+    if(window._pwCallback) { window._pwCallback(); window._pwCallback = null; }
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+function dismissPasswordModal() {
+  document.getElementById('pw-modal-bg').classList.add('hidden');
+  window._pwCallback = null;
+}
+
 // ══════════════════════════════════════════════════════
 const GAS_URL_KEY  = 'ensemble_gas_url';
 const GAS_AUTO_KEY = 'ensemble_gas_auto';
@@ -3328,13 +3447,15 @@ async function confirmInitModal() {
 // ══════════════════════════════════════════════════════
 loadData();
 initGasCodeBlock();
-
+applyHeaderLinks();
 
 // 最後に開いていたタブを復元
 (function restoreTab() {
   const saved = localStorage.getItem('ensemble_last_tab') || 'practice';
   const tabNames = ['practice','admin','data'];
-  const name = tabNames.includes(saved) ? saved : 'practice';
+  // dataタブはパスワード未解除なら practiceに戻す
+  const rawName = tabNames.includes(saved) ? saved : 'practice';
+  const name = (rawName === 'data' && !isDataUnlocked()) ? 'practice' : rawName;
   const btns = document.querySelectorAll('.tab-btn');
   const idx  = tabNames.indexOf(name);
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
