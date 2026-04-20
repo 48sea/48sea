@@ -190,7 +190,7 @@
   .past-dates-inner { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
 
   /* ── 折りたたみsection（練習日選択・日程追加フォーム） ── */
-  .collapsible-section { background: white; border-radius: 10px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+  .collapsible-section { background: white; border-radius: 10px; margin-bottom: 0; box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
   .collapsible-header { display: flex; align-items: center; gap: 8px; padding: 11px 14px; cursor: pointer; user-select: none; -webkit-user-select: none; }
   .collapsible-header .section-title { margin: 0; padding: 0; border: none; flex: 1; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
   .collapsible-arrow { font-size: 0.6rem; color: var(--muted); transition: transform 0.22s; flex-shrink: 0; }
@@ -199,7 +199,11 @@
   .collapsible-section.open .collapsible-body { display: block; }
   .collapsible-peek { font-size: 0.75rem; color: var(--sage); font-weight: 600; flex-shrink: 0; max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  /* ── ヘッダーリンクボタン ── */
+  /* 練習日選択＋サマリーバーはセットで間をゼロに */
+  #cs-practice-dates { margin-bottom: 0; }
+  #cs-practice-dates:not(+ .practice-summary-bar.visible) { margin-bottom: 0; }
+  /* サマリーバーが非表示の時はcollapsibleに下余白を付ける */
+  #attendance-section { margin-top: 10px; }
   .hdr-link-btn { display: inline-flex; align-items: center; gap: 3px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.82); font-size: 0.7rem; padding: 3px 9px; border-radius: 20px; text-decoration: none; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
   .hdr-link-btn:hover { background: rgba(255,255,255,0.22); color: white; }
 
@@ -467,7 +471,7 @@
   .att-comment:focus { border-color: #2e7d5a; background: white; }
 
   /* ── サマリーバー ── */
-  .practice-summary-bar { background:white; border:1px solid #b8d0e8; border-left:4px solid #3a6ea8; border-radius:9px; padding:10px 14px; margin-bottom:8px; display:none; }
+  .practice-summary-bar { background:white; border:1px solid #b8d0e8; border-top: none; border-left:4px solid #3a6ea8; border-radius:0 0 9px 9px; padding:8px 14px 10px; margin-bottom:10px; display:none; }
   .practice-summary-bar.visible { display:block; }
   .practice-summary-date { font-size:0.88rem; font-weight:700; color:var(--ink); margin-bottom:3px; }
   .practice-summary-meta { font-size:0.78rem; color:var(--muted); }
@@ -951,7 +955,7 @@ function esc(s) {
 // ══════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════
-let data = { members:[], dates:[], songs:[], attendance:{}, parts:[], categories:[], venues:[] };
+let data = { members:[], dates:[], songs:[], attendance:{}, parts:[], categories:[], venues:[], bbs:[] };
 let selectedDateId = null;
 
 // ══════════════════════════════════════════════════════
@@ -966,6 +970,7 @@ function loadData() {
   if (!data.parts)      data.parts      = [];
   if (!data.categories) data.categories = [];
   if (!data.venues)     data.venues     = [];
+  if (!data.bbs)        data.bbs        = [];
   // 既存日程をすべて本日程（confirmed:true）に
   data.dates.forEach(d => { d.confirmed = true; if(!d.songIds) d.songIds = []; });
   // メンバーにpartId/categoryId/absenceがなければ初期化
@@ -2010,15 +2015,24 @@ function buildBulkRow(d, memberId, setBulkFn) {
 
   const labelDiv = document.createElement('div');
   labelDiv.className = 'bulk-date-label';
+  // 日付＋時間を同じ行に
   const dateText = document.createElement('div');
-  dateText.innerHTML = provTag + fmtDate(d.date);
+  dateText.innerHTML = provTag + fmtDate(d.date)
+    + (d.time ? `<span style="font-size:0.72rem;color:var(--muted);margin-left:6px">${esc(d.time)}</span>` : '');
   labelDiv.appendChild(dateText);
-  const subParts = [d.time, d.place, d.comment].filter(Boolean);
-  if(subParts.length) {
-    const sub = document.createElement('div');
-    sub.className = 'bulk-date-memo';
-    sub.textContent = subParts.join('　／　');
-    labelDiv.appendChild(sub);
+  // 場所
+  if(d.place) {
+    const placeSub = document.createElement('div');
+    placeSub.className = 'bulk-date-memo';
+    placeSub.textContent = d.place;
+    labelDiv.appendChild(placeSub);
+  }
+  // コメントは太字赤色で強調
+  if(d.comment) {
+    const cmtSub = document.createElement('div');
+    cmtSub.style.cssText = 'font-size:0.72rem;font-weight:700;color:#b04000;margin-top:1px';
+    cmtSub.textContent = d.comment;
+    labelDiv.appendChild(cmtSub);
   }
 
   const btnsDiv = document.createElement('div');
@@ -2218,8 +2232,10 @@ function renderAdminAttendanceGrid() {
   // 人数集計（全エントリ）
   const allEntries = [...guestEntries, ...data.members.map(m=>({id:m.id, name:m.name, isGuest:false}))];
   const presentCount = allEntries.filter(e => attStatus(e.id) === 'present').length;
+  const guestCount = guestEntries.length;
+  const guestLabel = guestCount ? ` <span style="color:#5a9fd4;font-size:0.72rem">+${guestCount}</span>` : '';
   const countBar = `<div class="att-count-bar">
-    <span class="att-count-total">参加人数：${presentCount}人</span>
+    <span class="att-count-total">参加人数：${presentCount}人${guestLabel}</span>
   </div>`;
 
   // ゲストカード
@@ -2260,9 +2276,16 @@ function renderAdminAttendanceGrid() {
     const members = groups[part.id] || [];
     const dateStr = d ? d.date : '';
     const visibleMembers = members.filter(m => !isMemberAbsent(m, dateStr));
-    if(!visibleMembers.length) return;
+    // このパートのゲスト数
+    const partGuests = guestEntries.filter(g => {
+      const matchPart = data.parts.find(p=>p.name===g.part);
+      const gpid = matchPart ? matchPart.id : '';
+      return gpid === part.id;
+    });
+    if(!visibleMembers.length && !partGuests.length) return;
+    const guestCountLabel = partGuests.length ? ` <span style="color:#5a9fd4;font-size:0.68rem">+${partGuests.length}</span>` : '';
     html += `<div style="margin-bottom:10px">
-      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;color:var(--muted);background:var(--cream);padding:4px 10px;border-radius:5px;margin-bottom:5px">${esc(part.name)}</div>`;
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.06em;color:white;background:#2a2a2a;padding:4px 10px;border-radius:5px;margin-bottom:5px">${esc(part.name)}${guestCountLabel}</div>`;
     html += visibleMembers.map(entry => {
       const rec   = attRecord(entry.id);
       const s     = rec.status;
@@ -2479,10 +2502,18 @@ function renderPracticeAttendance() {
     }
   }
 
-  // ── コメント一覧更新 ──
+  // ── コメント一覧更新（パート名3文字以下に短縮して付加）──
+  function shortPart(member) {
+    const p = data.parts.find(p=>p.id===member.partId);
+    if(!p) return '';
+    return p.name.length > 3 ? p.name.slice(0,3) : p.name;
+  }
   const allCommentItems = [
-    ...data.members.map(m => ({ name: m.name, comment: getComment(m.id) })),
-    ...guests.map(g => ({ name: g.name+(g.part?'（'+g.part+'）':''), comment: getComment(g.id) }))
+    ...data.members.map(m => {
+      const sp = shortPart(m);
+      return { name: (sp ? `[${sp}]` : '') + m.name, comment: getComment(m.id) };
+    }),
+    ...guests.map(g => ({ name: (g.part?`[${g.part.slice(0,3)}]`:'')+g.name, comment: getComment(g.id) }))
   ].filter(x => x.comment.trim());
   const cbar = document.getElementById('prac-comment-bar');
   const clist = document.getElementById('prac-comment-list');
@@ -2949,6 +2980,7 @@ function applyCloud(cloudData, savedAt) {
   data = cloudData;
   if(!data.attendance)    data.attendance={};
   if(!data.venues)        data.venues=[];
+  if(!data.bbs)           data.bbs=[];
   Object.keys(data.attendance).forEach(did=>{
     if(Array.isArray(data.attendance[did])){
       const obj={};
@@ -2956,9 +2988,8 @@ function applyCloud(cloudData, savedAt) {
       data.attendance[did]=obj;
     }
   });
-  lastPulledAt       = data._updatedAt || 0; // 適用時点を記録
-  lastPulledSnapshot = JSON.parse(JSON.stringify(data)); // 差分比較用スナップショット
-  // クラウドデータにURLが含まれていれば反映
+  lastPulledAt       = data._updatedAt || 0;
+  lastPulledSnapshot = JSON.parse(JSON.stringify(data));
   if (data._gasUrl) {
     localStorage.setItem(GAS_URL_KEY, data._gasUrl);
     const urlEl = document.getElementById('gas-url');
@@ -2970,6 +3001,8 @@ function applyCloud(cloudData, savedAt) {
   if(document.getElementById('screen-admin').classList.contains('active')){
     renderMemberList(); renderPartList(); renderCategoryList(); renderVenueList(); renderVenueBtns(); renderDateList(); renderSongList();
   }
+  // BBSにも最新データを通知
+  notifyBbsRefresh();
   const t=savedAt ? new Date(Number(savedAt)).toLocaleString('ja-JP') : '';
   updateSyncUI('ok','クラウドを適用しました', t ? `データ日時：${t}` : '');
   setTimeout(()=>{ if(autoSync) updateSyncUI('idle','待機中',''); }, 5000);
@@ -3550,22 +3583,31 @@ async function confirmInitModal() {
 // ══════════════════════════════════════════════════════
 // お知らせ BBS
 // ══════════════════════════════════════════════════════
-const NOTICE_SEEN_KEY = 'ensemble_notice_seen'; // 既読スレッドIDをJSON配列で保存
-const NOTICE_FILE     = '48seaBBS.html';        // BBSファイル名（同一ディレクトリ）
+const NOTICE_SEEN_KEY = 'ensemble_notice_seen';
+const NOTICE_FILE     = '48seaBBS.html';
 
 let _noticeOpen = false;
+
+// BBS iframe から呼ばれる：data.bbs を返す
+window.bbsGetThreads = function() { return data.bbs || []; };
+// BBS iframe から呼ばれる：data.bbs を更新してクラウドへ同期
+window.bbsSaveThreads = function(threads) {
+  data.bbs = threads;
+  saveData(); // 既存の同期インフラで自動的にGASへ送信
+};
 
 function openNotice() {
   const modal = document.getElementById('notice-modal');
   const frame = document.getElementById('notice-frame');
   if(!modal || !frame) return;
-  // iframeをロード（既に同じsrcなら再ロードしない）
-  if(frame.src !== location.origin + location.pathname.replace(/[^/]*$/, '') + NOTICE_FILE) {
+  if(!frame.src || frame.src === 'about:blank' || frame.src === '') {
     frame.src = NOTICE_FILE;
+  } else {
+    // 既にロード済みの場合はデータを再送信
+    try { frame.contentWindow.postMessage({type:'refresh_threads'}, '*'); } catch(e){}
   }
   modal.classList.remove('hidden');
   _noticeOpen = true;
-  // 開いたら未読をクリア
   clearNoticeBadge();
 }
 function closeNotice() {
@@ -3576,10 +3618,18 @@ function closeNotice() {
 
 // BBSファイルから未読件数をpostMessageで受信
 window.addEventListener('message', function(e) {
-  if(!e.data || e.data.type !== 'bbs_unread') return;
-  const count = e.data.count || 0;
-  updateNoticeBadge(count);
+  if(!e.data) return;
+  if(e.data.type === 'bbs_unread') updateNoticeBadge(e.data.count || 0);
+  if(e.data.type === 'mark_read')  clearNoticeBadge();
 });
+
+// 同期でクラウドから新データが来たらBBSに通知
+function notifyBbsRefresh() {
+  const frame = document.getElementById('notice-frame');
+  if(frame && frame.contentWindow) {
+    try { frame.contentWindow.postMessage({type:'refresh_threads'}, '*'); } catch(e){}
+  }
+}
 
 function updateNoticeBadge(count) {
   const btn   = document.getElementById('notice-btn');
@@ -3598,11 +3648,6 @@ function clearNoticeBadge() {
   const badge = document.getElementById('notice-badge');
   if(btn)   btn.classList.remove('has-unread');
   if(badge) badge.style.display = 'none';
-  // BBSファイルに既読通知を送る
-  const frame = document.getElementById('notice-frame');
-  if(frame && frame.contentWindow) {
-    try { frame.contentWindow.postMessage({type:'mark_read'}, '*'); } catch(e){}
-  }
 }
 
 // ══════════════════════════════════════════════════════
