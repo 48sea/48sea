@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お知らせ BBS</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans JP', sans-serif; background: #f6f6f6; color: #1c1c1c; font-size: 14px; height: 100dvh; display: flex; flex-direction: column; }
+
+/* ── ツールバー ── */
+.toolbar { background: #1c1c1c; color: white; padding: 10px 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.toolbar-title { flex: 1; font-size: 0.85rem; font-weight: 700; }
+.btn-new { background: #3a6ea8; border: none; color: white; font-size: 0.78rem; font-weight: 700; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.btn-new:hover { background: #2a5a8a; }
+
+/* ── スレッド一覧 ── */
+.thread-list { flex: 1; overflow-y: auto; padding: 10px 12px; }
+.empty-msg { text-align: center; padding: 40px 0; color: #888; font-size: 0.85rem; }
+
+/* スレッドアイテム */
+.thread-item { background: white; border-radius: 10px; margin-bottom: 8px; border: 1px solid #ddd; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+.thread-header { display: flex; align-items: flex-start; gap: 10px; padding: 11px 13px; cursor: pointer; user-select: none; }
+.thread-header:hover { background: #f8f8f8; }
+.thread-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #3a6ea8; flex-shrink: 0; margin-top: 5px; }
+.thread-unread-dot.read { background: transparent; }
+.thread-meta { flex: 1; min-width: 0; }
+.thread-title { font-size: 0.88rem; font-weight: 700; color: #1c1c1c; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thread-info  { font-size: 0.68rem; color: #888; display: flex; gap: 8px; flex-wrap: wrap; }
+.thread-author { font-weight: 600; color: #555; }
+.thread-reply-count { background: #eaeaea; border-radius: 10px; padding: 1px 7px; font-size: 0.65rem; font-weight: 700; color: #666; flex-shrink: 0; align-self: center; }
+.thread-arrow { font-size: 0.6rem; color: #aaa; transition: transform 0.2s; flex-shrink: 0; margin-top: 4px; }
+.thread-item.open .thread-arrow { transform: rotate(90deg); }
+
+/* スレッド本文・返信 */
+.thread-body { display: none; border-top: 1px solid #eee; }
+.thread-item.open .thread-body { display: block; }
+.thread-post { padding: 10px 13px; border-bottom: 1px solid #f0f0f0; }
+.thread-post:last-child { border-bottom: none; }
+.post-header { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.post-author { font-size: 0.75rem; font-weight: 700; color: #3a6ea8; }
+.post-date   { font-size: 0.65rem; color: #aaa; }
+.post-op-badge { font-size: 0.6rem; background: #3a6ea8; color: white; border-radius: 3px; padding: 1px 5px; font-weight: 700; }
+.post-content { font-size: 0.82rem; line-height: 1.65; color: #222; white-space: pre-wrap; word-break: break-word; }
+
+/* 返信フォーム */
+.reply-form { padding: 10px 13px 12px; background: #f8f8f8; border-top: 1px solid #e8e8e8; }
+.reply-form input, .reply-form textarea {
+  font-family: 'Noto Sans JP', sans-serif; font-size: 0.82rem;
+  border: 1px solid #ccc; border-radius: 7px; padding: 7px 10px;
+  width: 100%; background: white; color: #1c1c1c; outline: none;
+  margin-bottom: 6px; display: block;
+}
+.reply-form textarea { resize: vertical; min-height: 64px; }
+.reply-form input:focus, .reply-form textarea:focus { border-color: #3a6ea8; }
+.reply-btns { display: flex; gap: 6px; justify-content: flex-end; }
+.btn-reply { background: #2e7d5a; border: none; color: white; font-size: 0.78rem; font-weight: 700; padding: 7px 18px; border-radius: 7px; cursor: pointer; font-family: inherit; }
+.btn-cancel { background: none; border: 1px solid #ccc; color: #666; font-size: 0.78rem; padding: 7px 14px; border-radius: 7px; cursor: pointer; font-family: inherit; }
+
+/* ── 新規スレッドモーダル ── */
+.new-thread-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: flex-end; justify-content: center; }
+.new-thread-overlay.open { display: flex; }
+.new-thread-popup { background: #f6f6f6; width: 100%; border-radius: 18px 18px 0 0; padding: 18px 16px 32px; animation: slideUp 0.25s ease; max-height: 90dvh; overflow-y: auto; }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.new-thread-title { font-size: 1rem; font-weight: 700; margin-bottom: 14px; }
+.new-thread-popup input, .new-thread-popup textarea {
+  font-family: 'Noto Sans JP', sans-serif; font-size: 0.85rem;
+  border: 1px solid #ccc; border-radius: 8px; padding: 9px 12px;
+  width: 100%; background: white; color: #1c1c1c; outline: none;
+  margin-bottom: 9px; display: block;
+}
+.new-thread-popup textarea { resize: vertical; min-height: 100px; }
+.new-thread-popup input:focus, .new-thread-popup textarea:focus { border-color: #3a6ea8; }
+.form-label { font-size: 0.72rem; font-weight: 700; color: #666; margin-bottom: 4px; }
+.submit-row { display: flex; gap: 8px; margin-top: 6px; }
+.submit-row .btn-new { flex: 1; padding: 10px; font-size: 0.85rem; border-radius: 9px; }
+.submit-row .btn-cancel { flex: 1; padding: 10px; font-size: 0.85rem; background: none; border: 1px solid #ccc; border-radius: 9px; cursor: pointer; font-family: inherit; color: #666; }
+.handle { width: 40px; height: 4px; background: #ccc; border-radius: 2px; margin: 0 auto 16px; }
+
+/* トースト */
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(10px); background: rgba(28,28,28,0.92); color: #f5f5f5; padding: 8px 18px; border-radius: 24px; font-size: 0.78rem; font-weight: 500; z-index: 500; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ローディング */
+.loading { text-align: center; padding: 30px 0; color: #888; font-size: 0.82rem; }
+.loading-spin { display: inline-block; width: 20px; height: 20px; border: 2px solid #ccc; border-top-color: #3a6ea8; border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 8px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="toolbar-title">📢 お知らせ掲示板</span>
+  <button class="btn-new" onclick="showNewThread()">＋ 新規投稿</button>
+</div>
+
+<div class="thread-list" id="thread-list">
+  <div class="loading"><div class="loading-spin"></div><br>読み込み中…</div>
+</div>
+
+<!-- 新規スレッドオーバーレイ -->
+<div id="new-thread-overlay" class="new-thread-overlay" onclick="overlayClose(event)">
+  <div class="new-thread-popup">
+    <div class="handle"></div>
+    <div class="new-thread-title">📝 新規投稿</div>
+    <div class="form-label">投稿者名 *</div>
+    <input type="text" id="new-author" placeholder="名前を入力" maxlength="30"/>
+    <div class="form-label">タイトル *</div>
+    <input type="text" id="new-subject" placeholder="タイトルを入力" maxlength="60"/>
+    <div class="form-label">本文 *</div>
+    <textarea id="new-body" placeholder="本文を入力"></textarea>
+    <div class="submit-row">
+      <button class="btn-cancel" onclick="hideNewThread()">キャンセル</button>
+      <button class="btn-new" onclick="submitNewThread()">投稿する</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// 設定
+// ══════════════════════════════════════════════════════
+// GAS URLはlocalStorageから親ページと共有（同一オリジンの場合）
+// または直接書き換える
+const GAS_URL_KEY = 'ensemble_gas_url';
+const HARDCODED_GAS_URL = 'https://script.google.com/macros/s/AKfycbxPCToel4RS3u2dSAPGXdRJMEGU2tmm19-ht3j3jBJPiBRJD9aPGi4A_nhjmHaXqz_Xrw/exec';
+
+const BBS_SEEN_KEY   = 'ensemble_bbs_seen'; // 既読スレッドIDセット（JSON配列）
+const BBS_CACHE_KEY  = 'ensemble_bbs_cache';
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let threads = [];    // [{id, subject, author, date, body, replies:[{author,date,body}]}]
+let seenIds  = new Set();
+let _loading = false;
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDt(ts) {
+  const d = new Date(ts);
+  return d.getFullYear()+'/'+(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getDate().toString().padStart(2,'0')
+    +' '+d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+}
+let _toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast'); if(!el) return;
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>el.classList.remove('show'), 3000);
+}
+function uid() { return 'bbs_'+Date.now()+'_'+Math.random().toString(36).substr(2,6); }
+
+function getGasUrl() {
+  if(HARDCODED_GAS_URL) return HARDCODED_GAS_URL;
+  try { return localStorage.getItem(GAS_URL_KEY) || ''; } catch(e){ return ''; }
+}
+
+// ══════════════════════════════════════════════════════
+// 既読管理
+// ══════════════════════════════════════════════════════
+function loadSeen() {
+  try { const s=localStorage.getItem(BBS_SEEN_KEY); seenIds=new Set(s?JSON.parse(s):[]); } catch(e){ seenIds=new Set(); }
+}
+function markSeen(id) {
+  seenIds.add(id);
+  try { localStorage.setItem(BBS_SEEN_KEY, JSON.stringify([...seenIds])); } catch(e){}
+}
+function markAllRead() {
+  threads.forEach(t => markSeen(t.id));
+  reportUnread();
+}
+function countUnread() {
+  return threads.filter(t => !seenIds.has(t.id)).length;
+}
+function reportUnread() {
+  // 親ウィンドウに未読件数を通知
+  try {
+    window.parent.postMessage({ type:'bbs_unread', count: countUnread() }, '*');
+  } catch(e){}
+}
+
+// ══════════════════════════════════════════════════════
+// 親ページからのメッセージ受信
+// ══════════════════════════════════════════════════════
+window.addEventListener('message', function(e) {
+  if(e.data && e.data.type === 'mark_read') markAllRead();
+});
+
+// ══════════════════════════════════════════════════════
+// データ管理（GAS連携）
+// ══════════════════════════════════════════════════════
+async function loadThreads() {
+  // キャッシュから先に表示
+  try {
+    const cached = localStorage.getItem(BBS_CACHE_KEY);
+    if(cached) { threads = JSON.parse(cached); renderThreads(); }
+  } catch(e){}
+
+  const url = getGasUrl();
+  if(!url) { renderThreads(); return; }
+
+  try {
+    const res  = await fetch(url+'?action=bbs_load', {method:'GET'});
+    const json = await res.json();
+    if(json.status==='ok' && json.threads) {
+      threads = json.threads;
+      localStorage.setItem(BBS_CACHE_KEY, JSON.stringify(threads));
+    }
+  } catch(e) {
+    // GASがBBS未対応の場合はlocalStorageキャッシュのみ使用
+  }
+  renderThreads();
+  reportUnread();
+}
+
+async function saveThreads() {
+  // localStorageに保存（オフライン対応）
+  try { localStorage.setItem(BBS_CACHE_KEY, JSON.stringify(threads)); } catch(e){}
+  // GASに送信
+  const url = getGasUrl();
+  if(!url) return;
+  try {
+    await fetch(url, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'bbs_save', threads})
+    });
+  } catch(e){}
+}
+
+// ══════════════════════════════════════════════════════
+// レンダリング
+// ══════════════════════════════════════════════════════
+function renderThreads() {
+  const el = document.getElementById('thread-list');
+  if(!threads.length) {
+    el.innerHTML = '<div class="empty-msg">📭 投稿がありません<br><br>右上の「＋ 新規投稿」から投稿できます</div>';
+    return;
+  }
+  el.innerHTML = '';
+  // 新しい順
+  [...threads].sort((a,b)=>b.date-a.date).forEach(t => {
+    const isUnread = !seenIds.has(t.id);
+    const div = document.createElement('div');
+    div.className = 'thread-item';
+    div.id = 'thread-'+t.id;
+    div.innerHTML = `
+      <div class="thread-header" onclick="toggleThread('${t.id}')">
+        <div class="thread-unread-dot ${isUnread?'':'read'}"></div>
+        <div class="thread-meta">
+          <div class="thread-title">${esc(t.subject)}</div>
+          <div class="thread-info">
+            <span class="thread-author">${esc(t.author)}</span>
+            <span>${fmtDt(t.date)}</span>
+          </div>
+        </div>
+        ${t.replies&&t.replies.length ? `<span class="thread-reply-count">返信${t.replies.length}</span>` : ''}
+        <span class="thread-arrow">▶</span>
+      </div>
+      <div class="thread-body" id="tbody-${t.id}">
+        <div class="thread-post">
+          <div class="post-header">
+            <span class="post-author">${esc(t.author)}</span>
+            <span class="post-op-badge">OP</span>
+            <span class="post-date">${fmtDt(t.date)}</span>
+          </div>
+          <div class="post-content">${esc(t.body)}</div>
+        </div>
+        ${(t.replies||[]).map(r=>`
+          <div class="thread-post" style="background:#fafafa;padding-left:20px">
+            <div class="post-header">
+              <span class="post-author">${esc(r.author)}</span>
+              <span class="post-date">${fmtDt(r.date)}</span>
+            </div>
+            <div class="post-content">${esc(r.body)}</div>
+          </div>`).join('')}
+        <div class="reply-form" id="rform-${t.id}">
+          <div class="form-label" style="margin-bottom:5px">返信する</div>
+          <input type="text" id="ra-${t.id}" placeholder="名前" maxlength="30"/>
+          <textarea id="rb-${t.id}" placeholder="返信内容" style="min-height:50px"></textarea>
+          <div class="reply-btns">
+            <button class="btn-cancel" onclick="toggleThread('${t.id}')">閉じる</button>
+            <button class="btn-reply" onclick="submitReply('${t.id}')">返信</button>
+          </div>
+        </div>
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// 操作
+// ══════════════════════════════════════════════════════
+function toggleThread(id) {
+  const div = document.getElementById('thread-'+id); if(!div) return;
+  const opening = !div.classList.contains('open');
+  // 他を閉じる
+  document.querySelectorAll('.thread-item.open').forEach(el => el.classList.remove('open'));
+  if(opening) {
+    div.classList.add('open');
+    markSeen(id);
+    // 未読ドットを消す
+    const dot = div.querySelector('.thread-unread-dot');
+    if(dot) dot.classList.add('read');
+    reportUnread();
+    // 返信フォームにスクロール
+    setTimeout(()=>{
+      const form = document.getElementById('rform-'+id);
+      if(form) form.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }, 200);
+  }
+}
+
+function showNewThread() {
+  document.getElementById('new-thread-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('new-author').focus(), 200);
+}
+function hideNewThread() {
+  document.getElementById('new-thread-overlay').classList.remove('open');
+}
+function overlayClose(e) {
+  if(e.target===document.getElementById('new-thread-overlay')) hideNewThread();
+}
+
+function submitNewThread() {
+  const author  = document.getElementById('new-author').value.trim();
+  const subject = document.getElementById('new-subject').value.trim();
+  const body    = document.getElementById('new-body').value.trim();
+  if(!author)  { document.getElementById('new-author').focus();  showToast('名前を入力してください'); return; }
+  if(!subject) { document.getElementById('new-subject').focus(); showToast('タイトルを入力してください'); return; }
+  if(!body)    { document.getElementById('new-body').focus();    showToast('本文を入力してください'); return; }
+
+  const t = { id: uid(), subject, author, body, date: Date.now(), replies: [] };
+  threads.unshift(t);
+  markSeen(t.id);
+  saveThreads();
+  renderThreads();
+  reportUnread();
+  hideNewThread();
+  document.getElementById('new-author').value = '';
+  document.getElementById('new-subject').value = '';
+  document.getElementById('new-body').value = '';
+  showToast('✅ 投稿しました！');
+}
+
+function submitReply(threadId) {
+  const author = (document.getElementById('ra-'+threadId)||{}).value?.trim();
+  const body   = (document.getElementById('rb-'+threadId)||{}).value?.trim();
+  if(!author) { showToast('名前を入力してください'); return; }
+  if(!body)   { showToast('返信内容を入力してください'); return; }
+
+  const t = threads.find(t=>t.id===threadId); if(!t) return;
+  if(!t.replies) t.replies=[];
+  t.replies.push({ author, body, date: Date.now() });
+  saveThreads();
+  renderThreads();
+  // 開き直す
+  const div = document.getElementById('thread-'+threadId);
+  if(div) { div.classList.add('open'); markSeen(threadId); }
+  showToast('✅ 返信しました！');
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+loadSeen();
+loadThreads();
+</script>
+</body>
+</html>
