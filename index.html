@@ -284,7 +284,7 @@
   .bulk-popup-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 2px; }
   .bulk-popup-sub  { font-size: 0.75rem; color: var(--muted); margin-bottom: 14px; }
   /* 行：縦並び */
-  .bulk-date-row { display: block; padding: 8px 0; border-bottom: 1px solid var(--cream); }
+  .bulk-date-row { display: block; padding: 8px 0; border-bottom: 1px solid #aaa; }
   .bulk-date-row:last-child { border-bottom: none; }
   /* 上段：日付 + 出欠ボタン */
   .bulk-date-top { display: flex; align-items: center; gap: 8px; }
@@ -488,7 +488,70 @@
   .notice-modal-header { background:var(--ink); color:white; display:flex; align-items:center; padding:12px 16px; gap:10px; flex-shrink:0; }
   .notice-modal-title { flex:1; font-size:1rem; font-weight:700; }
   .notice-modal-close { background:rgba(255,255,255,0.12); border:none; color:white; font-size:1rem; width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .notice-frame { flex:1; width:100%; border:none; background:transparent; }
+  .notice-frame { display:none; } /* iframe廃止 */
+
+  /* ── BBS インライン ── */
+  .bbs-root { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#f4f4f4; }
+  .bbs-toolbar { background:#2a2a2a; padding:9px 14px; display:flex; align-items:center; flex-shrink:0; }
+  .bbs-btn-new { background:#3a6ea8; border:none; color:white; font-size:0.78rem; font-weight:700; padding:6px 14px; border-radius:20px; cursor:pointer; font-family:inherit; margin-left:auto; }
+  .bbs-list { flex:1; overflow-y:auto; padding:10px 12px 20px; }
+  .bbs-empty { text-align:center; padding:40px 0; color:#888; font-size:0.85rem; line-height:1.8; }
+  /* スレッドアイテム */
+  .bbs-thread { background:white; border-radius:10px; margin-bottom:8px; border:1px solid #ddd; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.07); }
+  .bbs-thread-hdr { display:flex; align-items:flex-start; gap:10px; padding:11px 13px; cursor:pointer; user-select:none; -webkit-user-select:none; }
+  .bbs-unread-dot { width:8px; height:8px; border-radius:50%; background:#3a6ea8; flex-shrink:0; margin-top:5px; }
+  .bbs-unread-dot.read { background:transparent; }
+  .bbs-thread-meta { flex:1; min-width:0; }
+  .bbs-thread-title { font-size:0.88rem; font-weight:700; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bbs-thread-info  { font-size:0.68rem; color:#888; display:flex; gap:8px; }
+  .bbs-thread-author { font-weight:600; color:#555; }
+  .bbs-reply-badge { background:#e8f0fa; border:1px solid #c0d0ea; border-radius:10px; padding:1px 7px; font-size:0.65rem; font-weight:700; color:#3a6ea8; flex-shrink:0; align-self:center; }
+  .bbs-arrow { font-size:0.6rem; color:#aaa; transition:transform 0.2s; flex-shrink:0; margin-top:4px; }
+  .bbs-thread.open .bbs-arrow { transform:rotate(90deg); }
+  .bbs-thread-body { display:none; border-top:1px solid #eee; }
+  .bbs-thread.open .bbs-thread-body { display:block; }
+  /* 投稿 */
+  .bbs-post { padding:10px 13px; border-bottom:1px solid #f0f0f0; }
+  .bbs-post:last-child { border-bottom:none; }
+  .bbs-post-hdr { display:flex; align-items:center; gap:6px; margin-bottom:5px; flex-wrap:wrap; }
+  .bbs-post-author { font-size:0.75rem; font-weight:700; color:#3a6ea8; }
+  .bbs-op-badge { font-size:0.6rem; background:#3a6ea8; color:white; border-radius:3px; padding:1px 5px; font-weight:700; }
+  .bbs-post-date { font-size:0.65rem; color:#aaa; flex:1; }
+  .bbs-del-btn { font-size:0.65rem; background:none; border:1px solid #e0b0b0; color:#c05050; border-radius:4px; padding:2px 7px; cursor:pointer; font-family:inherit; flex-shrink:0; }
+  .bbs-post-body { font-size:0.82rem; line-height:1.65; color:#222; white-space:pre-wrap; word-break:break-word; }
+  .bbs-reply-post { background:#fafafa; padding-left:16px; border-left:3px solid #e0e8f0; }
+  /* 返信フォーム */
+  .bbs-reply-form { padding:10px 13px 12px; background:#f4f8fe; border-top:1px solid #dde8f4; }
+  .bbs-reply-btns { display:flex; gap:6px; justify-content:flex-end; margin-top:6px; }
+  .bbs-btn-reply  { background:#2e7d5a; border:none; color:white; font-size:0.78rem; font-weight:700; padding:7px 16px; border-radius:7px; cursor:pointer; font-family:inherit; }
+  .bbs-btn-close  { background:none; border:1px solid #ccc; color:#666; font-size:0.78rem; padding:7px 12px; border-radius:7px; cursor:pointer; font-family:inherit; }
+  /* 新規投稿オーバーレイ */
+  .bbs-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:800; align-items:flex-end; justify-content:center; }
+  .bbs-overlay.open { display:flex; }
+  .bbs-popup { background:#f4f4f4; width:100%; max-width:520px; border-radius:18px 18px 0 0; padding:18px 16px 32px; animation:slideUp 0.22s ease; max-height:88vh; overflow-y:auto; }
+  .bbs-handle { width:38px; height:4px; background:#ccc; border-radius:2px; margin:0 auto 14px; }
+  .bbs-popup-title { font-size:1rem; font-weight:700; margin-bottom:14px; }
+  .bbs-form-label { font-size:0.72rem; font-weight:700; color:#666; margin-bottom:4px; }
+  .bbs-input { font-family:'Noto Sans JP',sans-serif; font-size:0.85rem; border:1px solid #ccc; border-radius:8px; padding:9px 12px; width:100%; background:white; color:#1c1c1c; outline:none; margin-bottom:10px; display:block; }
+  .bbs-input:focus { border-color:#3a6ea8; }
+  .bbs-textarea { resize:vertical; min-height:90px; }
+  .bbs-submit-row { display:flex; gap:8px; margin-top:4px; }
+  .bbs-submit-row button { flex:1; padding:10px; font-size:0.85rem; border-radius:9px; cursor:pointer; font-family:inherit; font-weight:700; border:none; }
+  .bbs-btn-submit { background:#3a6ea8; color:white; }
+  .bbs-btn-cancel { background:#eee; color:#555; }
+  /* 削除確認 */
+  .bbs-del-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:900; align-items:center; justify-content:center; padding:20px; }
+  .bbs-del-overlay.open { display:flex; }
+  .bbs-del-box { background:white; border-radius:14px; padding:22px 18px 18px; max-width:300px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .bbs-del-icon  { font-size:1.8rem; text-align:center; margin-bottom:8px; }
+  .bbs-del-title { font-size:0.95rem; font-weight:700; text-align:center; margin-bottom:6px; }
+  .bbs-del-sub   { font-size:0.78rem; color:#888; text-align:center; margin-bottom:14px; line-height:1.6; white-space:pre-wrap; }
+  .bbs-del-pw-input { font-family:'Noto Sans JP',sans-serif; font-size:1rem; border:2px solid #ddd; border-radius:8px; padding:9px 12px; width:100%; text-align:center; letter-spacing:0.2em; outline:none; margin-bottom:8px; display:block; }
+  .bbs-del-pw-input:focus { border-color:#3a6ea8; }
+  .bbs-del-btns { display:flex; gap:8px; }
+  .bbs-del-btns button { flex:1; padding:9px; font-size:0.85rem; border-radius:8px; cursor:pointer; font-family:inherit; font-weight:600; border:none; }
+  .bbs-del-btn-danger  { background:#c05050; color:white; }
+  .bbs-del-btn-cancel  { background:#f0f0f0; color:#555; }
 
   /* ── パスワードモーダル ── */
   .pw-modal-bg { position:fixed; inset:0; background:rgba(26,26,46,0.75); z-index:600; display:flex; align-items:center; justify-content:center; padding:20px; }
@@ -585,7 +648,51 @@
       <span class="notice-modal-title">📢 お知らせ</span>
       <button class="notice-modal-close" onclick="closeNotice()">✕</button>
     </div>
-    <iframe id="notice-frame" class="notice-frame" src="" frameborder="0" allowtransparency="true"></iframe>
+    <!-- BBS本体（インライン） -->
+    <div id="bbs-root" class="bbs-root">
+      <div class="bbs-toolbar">
+        <button class="bbs-btn-new" onclick="bbsShowNew()">＋ 新規投稿</button>
+      </div>
+      <div id="bbs-list" class="bbs-list">
+        <div class="bbs-empty">📭 まだ投稿がありません<br>「＋ 新規投稿」から書き込めます</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BBS 新規投稿オーバーレイ -->
+<div id="bbs-ov-new" class="bbs-overlay" onclick="if(event.target===this)bbsHideNew()">
+  <div class="bbs-popup">
+    <div class="bbs-handle"></div>
+    <div class="bbs-popup-title">📝 新規投稿</div>
+    <div class="bbs-form-label">投稿者名 *</div>
+    <input id="bbs-n-author"  type="text" class="bbs-input" placeholder="名前" maxlength="30"/>
+    <div class="bbs-form-label">タイトル *</div>
+    <input id="bbs-n-subject" type="text" class="bbs-input" placeholder="タイトル" maxlength="60"/>
+    <div class="bbs-form-label">本文 *</div>
+    <textarea id="bbs-n-body" class="bbs-input bbs-textarea" placeholder="本文を入力"></textarea>
+    <div class="bbs-submit-row">
+      <button class="bbs-btn-cancel" onclick="bbsHideNew()">キャンセル</button>
+      <button class="bbs-btn-submit" onclick="bbsSubmitNew()">投稿する</button>
+    </div>
+  </div>
+</div>
+
+<!-- BBS 削除確認モーダル -->
+<div id="bbs-ov-del" class="bbs-del-overlay" onclick="if(event.target===this)bbsCloseDel()">
+  <div class="bbs-del-box">
+    <div class="bbs-del-icon">🗑️</div>
+    <div class="bbs-del-title" id="bbs-del-title">削除しますか？</div>
+    <div class="bbs-del-sub"   id="bbs-del-sub">削除すると元に戻せません。</div>
+    <div id="bbs-del-pw-wrap" style="display:none">
+      <div style="font-size:0.72rem;font-weight:700;color:#666;text-align:center;margin-bottom:5px">管理パスワードを入力</div>
+      <input type="password" id="bbs-del-pw" class="bbs-del-pw-input" placeholder="••••" maxlength="10" onkeydown="if(event.key==='Enter')bbsConfirmDel()"/>
+      <div id="bbs-del-err" style="font-size:0.75rem;color:#c05050;font-weight:700;text-align:center;display:none;margin-bottom:6px">パスワードが違います</div>
+    </div>
+    <div class="bbs-del-btns">
+      <button class="bbs-del-btn-cancel" onclick="bbsCloseDel()">キャンセル</button>
+      <button class="bbs-del-btn-danger" onclick="bbsConfirmDel()">削除する</button>
+    </div>
   </div>
 </div>
 <div class="tab-bar">
@@ -2020,19 +2127,16 @@ function buildBulkRow(d, memberId, setBulkFn) {
   dateText.innerHTML = provTag + fmtDate(d.date)
     + (d.time ? `<span style="font-size:0.72rem;color:var(--muted);margin-left:6px">${esc(d.time)}</span>` : '');
   labelDiv.appendChild(dateText);
-  // 場所
-  if(d.place) {
-    const placeSub = document.createElement('div');
-    placeSub.className = 'bulk-date-memo';
-    placeSub.textContent = d.place;
-    labelDiv.appendChild(placeSub);
-  }
-  // コメントは太字赤色で強調
-  if(d.comment) {
-    const cmtSub = document.createElement('div');
-    cmtSub.style.cssText = 'font-size:0.72rem;font-weight:700;color:#b04000;margin-top:1px';
-    cmtSub.textContent = d.comment;
-    labelDiv.appendChild(cmtSub);
+  // 場所＋コメントを同じ行に（コメントは太字赤色）
+  const placeComment = [
+    d.place ? `<span>${esc(d.place)}</span>` : '',
+    d.comment ? `<span style="font-weight:700;color:#b04000;margin-left:6px">${esc(d.comment)}</span>` : ''
+  ].filter(Boolean).join('');
+  if(placeComment) {
+    const sub = document.createElement('div');
+    sub.className = 'bulk-date-memo';
+    sub.innerHTML = placeComment;
+    labelDiv.appendChild(sub);
   }
 
   const btnsDiv = document.createElement('div');
@@ -3581,73 +3685,237 @@ async function confirmInitModal() {
 
 
 // ══════════════════════════════════════════════════════
-// お知らせ BBS
+// お知らせ BBS（インライン実装）
 // ══════════════════════════════════════════════════════
-const NOTICE_SEEN_KEY = 'ensemble_notice_seen';
-const NOTICE_FILE     = '48seaBBS.html';
+const BBS_ADMIN_PASS  = '48';
+const BBS_AUTHOR_KEY  = 'bbs_my_author';
+const BBS_SEEN_KEY    = 'bbs_seen';
+const BBS_MYPOSTS_KEY = 'bbs_myposts';
 
 let _noticeOpen = false;
+let _bbsDelTarget = null;
 
-// BBS iframe から呼ばれる：data.bbs を返す
-window.bbsGetThreads = function() { return data.bbs || []; };
-// BBS iframe から呼ばれる：data.bbs を更新してクラウドへ同期
-window.bbsSaveThreads = function(threads) {
-  data.bbs = threads;
-  saveData(); // 既存の同期インフラで自動的にGASへ送信
-};
+// ── LS helpers ──
+function bbsLsGet(k,def){ try{const v=localStorage.getItem(k);return v===null?def:JSON.parse(v);}catch{return def;} }
+function bbsLsSet(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch{} }
 
+// ── 既読・自分の投稿 ──
+let _bbsSeen   = new Set(bbsLsGet(BBS_SEEN_KEY,  []));
+let _bbsMine   = new Set(bbsLsGet(BBS_MYPOSTS_KEY,[]));
+function bbsMarkSeen(id){ _bbsSeen.add(id); bbsLsSet(BBS_SEEN_KEY,[..._bbsSeen]); }
+function bbsAddMine(key){ _bbsMine.add(key); bbsLsSet(BBS_MYPOSTS_KEY,[..._bbsMine]); }
+function bbsIsMine(key){ return _bbsMine.has(key); }
+function bbsUid(){ return 'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function bbsFmtDt(ts){ const d=new Date(Number(ts)); return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+
+// ── データアクセス（data.bbs 経由） ──
+function bbsGetThreads(){ return data.bbs || []; }
+function bbsSaveThreads(threads){ data.bbs=threads; saveData(); }
+
+// ── モーダル開閉 ──
 function openNotice() {
-  const modal = document.getElementById('notice-modal');
-  const frame = document.getElementById('notice-frame');
-  if(!modal || !frame) return;
-  if(!frame.src || frame.src === 'about:blank' || frame.src === '') {
-    frame.src = NOTICE_FILE;
-  } else {
-    // 既にロード済みの場合はデータを再送信
-    try { frame.contentWindow.postMessage({type:'refresh_threads'}, '*'); } catch(e){}
-  }
-  modal.classList.remove('hidden');
+  document.getElementById('notice-modal').classList.remove('hidden');
   _noticeOpen = true;
   clearNoticeBadge();
+  bbsRenderAll();
 }
 function closeNotice() {
-  const modal = document.getElementById('notice-modal');
-  if(modal) modal.classList.add('hidden');
+  document.getElementById('notice-modal').classList.add('hidden');
   _noticeOpen = false;
 }
 
-// BBSファイルから未読件数をpostMessageで受信
-window.addEventListener('message', function(e) {
-  if(!e.data) return;
-  if(e.data.type === 'bbs_unread') updateNoticeBadge(e.data.count || 0);
-  if(e.data.type === 'mark_read')  clearNoticeBadge();
-});
-
-// 同期でクラウドから新データが来たらBBSに通知
+// ── クラウド同期後に再描画 ──
 function notifyBbsRefresh() {
-  const frame = document.getElementById('notice-frame');
-  if(frame && frame.contentWindow) {
-    try { frame.contentWindow.postMessage({type:'refresh_threads'}, '*'); } catch(e){}
-  }
+  if(_noticeOpen) bbsRenderAll();
+  // 未読バッジ更新
+  const unread = bbsGetThreads().filter(t=>!_bbsSeen.has(t.id)).length;
+  updateNoticeBadge(unread);
 }
 
+// ── バッジ ──
 function updateNoticeBadge(count) {
-  const btn   = document.getElementById('notice-btn');
-  const badge = document.getElementById('notice-badge');
-  if(!btn || !badge) return;
-  if(count > 0 && !_noticeOpen) {
-    badge.textContent = count > 9 ? '9+' : String(count);
-    badge.style.display = 'flex';
-    btn.classList.add('has-unread');
-  } else {
-    clearNoticeBadge();
-  }
+  const btn=document.getElementById('notice-btn'), badge=document.getElementById('notice-badge');
+  if(!btn||!badge) return;
+  if(count>0 && !_noticeOpen){ badge.textContent=count>9?'9+':String(count); badge.style.display='flex'; btn.classList.add('has-unread'); }
+  else clearNoticeBadge();
 }
 function clearNoticeBadge() {
-  const btn   = document.getElementById('notice-btn');
-  const badge = document.getElementById('notice-badge');
-  if(btn)   btn.classList.remove('has-unread');
-  if(badge) badge.style.display = 'none';
+  const btn=document.getElementById('notice-btn'), badge=document.getElementById('notice-badge');
+  if(btn) btn.classList.remove('has-unread');
+  if(badge) badge.style.display='none';
+}
+
+// ── レンダリング ──
+function bbsRenderAll() {
+  const threads = bbsGetThreads();
+  const el = document.getElementById('bbs-list');
+  if(!el) return;
+  // 開いているスレッドを記憶
+  const openIds = new Set([...el.querySelectorAll('.bbs-thread.open')].map(e=>e.dataset.tid));
+
+  if(!threads.length) {
+    el.innerHTML='<div class="bbs-empty">📭 まだ投稿がありません<br>「＋ 新規投稿」から書き込めます</div>';
+    updateNoticeBadge(0); return;
+  }
+  el.innerHTML='';
+  [...threads].sort((a,b)=>b.date-a.date).forEach(t=>{
+    const unread=!_bbsSeen.has(t.id);
+    const replies=t.replies||[];
+    const savedAuthor=bbsLsGet(BBS_AUTHOR_KEY,'')||'';
+    const div=document.createElement('div');
+    div.className='bbs-thread'+(openIds.has(t.id)?' open':'');
+    div.dataset.tid=t.id;
+    div.innerHTML=`
+      <div class="bbs-thread-hdr" onclick="bbsToggle('${t.id}')">
+        <div class="bbs-unread-dot ${unread?'':'read'}"></div>
+        <div class="bbs-thread-meta">
+          <div class="bbs-thread-title">${esc(t.subject)}</div>
+          <div class="bbs-thread-info"><span class="bbs-thread-author">${esc(t.author)}</span><span>${bbsFmtDt(t.date)}</span></div>
+        </div>
+        ${replies.length?`<span class="bbs-reply-badge">返信${replies.length}</span>`:''}
+        <span class="bbs-arrow">▶</span>
+      </div>
+      <div class="bbs-thread-body">
+        <div class="bbs-post">
+          <div class="bbs-post-hdr">
+            <span class="bbs-post-author">${esc(t.author)}</span>
+            <span class="bbs-op-badge">OP</span>
+            <span class="bbs-post-date">${bbsFmtDt(t.date)}</span>
+            <button class="bbs-del-btn" onclick="bbsAskDel(event,'${t.id}',null)">削除</button>
+          </div>
+          <div class="bbs-post-body">${esc(t.body)}</div>
+        </div>
+        ${replies.map((r,ri)=>`
+          <div class="bbs-post bbs-reply-post">
+            <div class="bbs-post-hdr">
+              <span class="bbs-post-author">${esc(r.author)}</span>
+              <span class="bbs-post-date">${bbsFmtDt(r.date)}</span>
+              <button class="bbs-del-btn" onclick="bbsAskDel(event,'${t.id}',${ri})">削除</button>
+            </div>
+            <div class="bbs-post-body">${esc(r.body)}</div>
+          </div>`).join('')}
+        <div class="bbs-reply-form" id="bbs-rf-${t.id}">
+          <div class="bbs-form-label" style="margin-bottom:5px">💬 返信する</div>
+          <input type="text" id="bbs-ra-${t.id}" class="bbs-input" style="margin-bottom:6px" placeholder="名前" maxlength="30" value="${esc(savedAuthor)}"/>
+          <textarea id="bbs-rb-${t.id}" class="bbs-input bbs-textarea" style="min-height:50px;margin-bottom:6px" placeholder="返信内容"></textarea>
+          <div class="bbs-reply-btns">
+            <button class="bbs-btn-close"  onclick="bbsToggle('${t.id}')">閉じる</button>
+            <button class="bbs-btn-reply"  onclick="bbsSubmitReply('${t.id}')">返信する</button>
+          </div>
+        </div>
+      </div>`;
+    el.appendChild(div);
+  });
+  const unreadCount=threads.filter(t=>!_bbsSeen.has(t.id)).length;
+  updateNoticeBadge(unreadCount);
+}
+
+// ── スレッド開閉 ──
+function bbsToggle(id) {
+  const item=document.querySelector(`.bbs-thread[data-tid="${id}"]`); if(!item) return;
+  const opening=!item.classList.contains('open');
+  document.querySelectorAll('.bbs-thread.open').forEach(e=>e.classList.remove('open'));
+  if(opening){
+    item.classList.add('open');
+    bbsMarkSeen(id);
+    item.querySelector('.bbs-unread-dot')?.classList.add('read');
+    const unreadCount=bbsGetThreads().filter(t=>!_bbsSeen.has(t.id)).length;
+    updateNoticeBadge(unreadCount);
+    setTimeout(()=>{ const rf=item.querySelector('.bbs-reply-form'); rf?.scrollIntoView({behavior:'smooth',block:'nearest'}); },200);
+  }
+}
+
+// ── 新規投稿 ──
+function bbsShowNew(){
+  document.getElementById('bbs-n-author').value  = bbsLsGet(BBS_AUTHOR_KEY,'')||'';
+  document.getElementById('bbs-n-subject').value = '';
+  document.getElementById('bbs-n-body').value    = '';
+  document.getElementById('bbs-ov-new').classList.add('open');
+  setTimeout(()=>{
+    const a=document.getElementById('bbs-n-author');
+    (a.value?document.getElementById('bbs-n-subject'):a).focus();
+  },200);
+}
+function bbsHideNew(){ document.getElementById('bbs-ov-new').classList.remove('open'); }
+
+function bbsSubmitNew(){
+  const author  = document.getElementById('bbs-n-author').value.trim();
+  const subject = document.getElementById('bbs-n-subject').value.trim();
+  const body    = document.getElementById('bbs-n-body').value.trim();
+  if(!author)  { document.getElementById('bbs-n-author').focus();  showToast('⚠️ 名前を入力してください',2500); return; }
+  if(!subject) { document.getElementById('bbs-n-subject').focus(); showToast('⚠️ タイトルを入力してください',2500); return; }
+  if(!body)    { document.getElementById('bbs-n-body').focus();    showToast('⚠️ 本文を入力してください',2500); return; }
+  bbsLsSet(BBS_AUTHOR_KEY,author);
+  const threads=bbsGetThreads();
+  const t={id:bbsUid(),subject,author,body,date:Date.now(),replies:[]};
+  threads.unshift(t);
+  bbsAddMine(t.id);
+  bbsMarkSeen(t.id);
+  bbsSaveThreads(threads);
+  bbsRenderAll();
+  bbsHideNew();
+  showToast('✅ 投稿しました！',2500);
+}
+
+// ── 返信 ──
+function bbsSubmitReply(tid){
+  const author=(document.getElementById('bbs-ra-'+tid)||{}).value?.trim();
+  const body  =(document.getElementById('bbs-rb-'+tid)||{}).value?.trim();
+  if(!author){ showToast('⚠️ 名前を入力してください',2500); return; }
+  if(!body)  { showToast('⚠️ 返信内容を入力してください',2500); return; }
+  bbsLsSet(BBS_AUTHOR_KEY,author);
+  const threads=bbsGetThreads();
+  const t=threads.find(t=>t.id===tid); if(!t) return;
+  if(!t.replies) t.replies=[];
+  const ri=t.replies.length;
+  t.replies.push({author,body,date:Date.now()});
+  bbsAddMine(tid+':'+ri);
+  bbsSaveThreads(threads);
+  bbsRenderAll();
+  setTimeout(()=>{ const item=document.querySelector(`.bbs-thread[data-tid="${tid}"]`); if(item&&!item.classList.contains('open')) bbsToggle(tid); },60);
+  showToast('✅ 返信しました！',2500);
+}
+
+// ── 削除 ──
+function bbsAskDel(e,tid,replyIdx){
+  e.stopPropagation();
+  const ri=(replyIdx===null||replyIdx===undefined||replyIdx==='null')?null:Number(replyIdx);
+  _bbsDelTarget={tid,ri};
+  const postKey=ri!==null?`${tid}:${ri}`:tid;
+  const mine=bbsIsMine(postKey);
+  document.getElementById('bbs-del-title').textContent=ri!==null?'この返信を削除しますか？':'このスレッドを削除しますか？';
+  document.getElementById('bbs-del-sub').textContent  =mine?'削除すると元に戻せません。':'自分の投稿ではありません。\n管理パスワードを入力してください。';
+  const pw=document.getElementById('bbs-del-pw-wrap');
+  pw.style.display=mine?'none':'block';
+  document.getElementById('bbs-del-pw').value='';
+  document.getElementById('bbs-del-err').style.display='none';
+  document.getElementById('bbs-ov-del').classList.add('open');
+  if(!mine) setTimeout(()=>document.getElementById('bbs-del-pw').focus(),200);
+}
+function bbsCloseDel(){ document.getElementById('bbs-ov-del').classList.remove('open'); _bbsDelTarget=null; }
+
+function bbsConfirmDel(){
+  if(!_bbsDelTarget) return;
+  const {tid,ri}=_bbsDelTarget;
+  const postKey=ri!==null?`${tid}:${ri}`:tid;
+  const mine=bbsIsMine(postKey);
+  if(!mine){
+    const pw=document.getElementById('bbs-del-pw').value;
+    if(pw!==BBS_ADMIN_PASS){ document.getElementById('bbs-del-err').style.display='block'; document.getElementById('bbs-del-pw').value=''; document.getElementById('bbs-del-pw').focus(); return; }
+  }
+  const threads=bbsGetThreads();
+  if(ri!==null){ const t=threads.find(t=>t.id===tid); if(t&&t.replies) t.replies.splice(ri,1); }
+  else { const idx=threads.findIndex(t=>t.id===tid); if(idx!==-1) threads.splice(idx,1); }
+  bbsSaveThreads(threads);
+  bbsCloseDel();
+  bbsRenderAll();
+  showToast('🗑️ 削除しました',2500);
+}
+
+// ── 起動時未読チェック ──
+function bbsCheckUnread(){
+  const unread=bbsGetThreads().filter(t=>!_bbsSeen.has(t.id)).length;
+  updateNoticeBadge(unread);
 }
 
 // ══════════════════════════════════════════════════════
@@ -3704,6 +3972,8 @@ if(autoSync){
     syncPull('force');
   }
 }
+// 起動時の未読チェック
+bbsCheckUnread();
 </script>
 <div id="toast" class="toast"></div>
 </body>
