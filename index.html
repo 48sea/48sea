@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>しばシー予定表</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c1c1c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="48seaLogo192.png">
+
 <style>
   :root {
     --ink: #1c1c1c; --paper: #f6f6f6; --cream: #eaeaea;
@@ -627,9 +633,9 @@
 <!-- ── HEADER ── -->
 <div class="app-header">
   <div style="display:flex;align-items:center;justify-content:center;gap:8px">
-    <h1>しばシー予定表 <span style="font-size:0.55rem;font-weight:400;opacity:0.5;letter-spacing:0.05em;vertical-align:middle">v2.0</span></h1>
+    <h1>しばシー予定表</h1>
     <button id="notice-btn" class="notice-btn" onclick="openNotice()" title="お知らせ">
-      📢
+      📢<span style="font-size:0.55rem;font-weight:400;opacity:0.5;letter-spacing:0.05em;vertical-align:middle">お知らせ</span>
       <span id="notice-badge" class="notice-badge" style="display:none">0</span>
     </button>
   </div>
@@ -1058,6 +1064,20 @@
 
 
 <script>
+// ══════════════════════════════════════════════════════
+// PWA (Service Worker) 登録
+// ══════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(registration => {
+        console.log('ServiceWorker 登録成功:', registration.scope);
+      })
+      .catch(error => {
+        console.log('ServiceWorker 登録失敗:', error);
+      });
+  });
+}
 // ══════════════════════════════════════════════════════
 // UTILS (最初に定義 - 他の関数から参照されるため)
 // ══════════════════════════════════════════════════════
