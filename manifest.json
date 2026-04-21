@@ -1,0 +1,13 @@
+{
+  "name": "芝浦シーサイド",
+  "short_name": "BBSS予定",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#7EC5CB",
+  "theme_color": "#1c1c1c",
+  "icons": [
+    {"src": "48seaLogo192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "48seaLogo512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
+
