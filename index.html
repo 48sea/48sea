@@ -548,9 +548,10 @@
   .bbs-input:focus { border-color:#3a6ea8; }
   .bbs-textarea { resize:vertical; min-height:90px; }
   .bbs-submit-row { display:flex; gap:8px; margin-top:4px; }
-  .bbs-submit-row button { flex:1; padding:10px; font-size:0.85rem; border-radius:9px; cursor:pointer; font-family:inherit; font-weight:700; border:none; }
+  .bbs-submit-row button { flex:1; padding:10px; font-size:0.82rem; border-radius:9px; cursor:pointer; font-family:inherit; font-weight:700; border:none; }
   .bbs-btn-submit { background:#3a6ea8; color:white; }
   .bbs-btn-cancel { background:#eee; color:#555; }
+  .bbs-btn-draft  { background:#f0c040; color:#3a2a00; }
   /* 削除確認 */
   .bbs-del-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:900; align-items:center; justify-content:center; padding:20px; }
   .bbs-del-overlay.open { display:flex; }
@@ -674,10 +675,13 @@
 </div>
 
 <!-- BBS 新規投稿オーバーレイ -->
-<div id="bbs-ov-new" class="bbs-overlay" onclick="if(event.target===this)bbsHideNew()">
+<div id="bbs-ov-new" class="bbs-overlay" onclick="if(event.target===this)bbsNewAskDiscard()">
   <div class="bbs-popup">
     <div class="bbs-handle"></div>
     <div class="bbs-popup-title">📝 新規投稿</div>
+    <div id="bbs-draft-banner" style="display:none;background:#fff8e1;border:1px solid #f0c040;border-radius:7px;padding:7px 11px;font-size:0.75rem;color:#7a5a00;margin-bottom:10px;display:none">
+      📄 下書きを読み込みました
+    </div>
     <div class="bbs-form-label">投稿者名 *</div>
     <input id="bbs-n-author"  type="text" class="bbs-input" placeholder="名前" maxlength="30"/>
     <div class="bbs-form-label">タイトル *</div>
@@ -685,8 +689,23 @@
     <div class="bbs-form-label">本文 *</div>
     <textarea id="bbs-n-body" class="bbs-input bbs-textarea" placeholder="本文を入力"></textarea>
     <div class="bbs-submit-row">
-      <button class="bbs-btn-cancel" onclick="bbsHideNew()">キャンセル</button>
+      <button class="bbs-btn-cancel" onclick="bbsNewAskDiscard()">キャンセル</button>
+      <button class="bbs-btn-draft"  onclick="bbsSaveDraft()">下書き保存</button>
       <button class="bbs-btn-submit" onclick="bbsSubmitNew()">投稿する</button>
+    </div>
+  </div>
+</div>
+
+<!-- BBS 下書き確認モーダル -->
+<div id="bbs-ov-discard" class="bbs-del-overlay" onclick="if(event.target===this)bbsDiscardCancel()">
+  <div class="bbs-del-box">
+    <div class="bbs-del-icon">📝</div>
+    <div class="bbs-del-title" id="bbs-discard-title">書きかけの内容があります</div>
+    <div class="bbs-del-sub">どうしますか？</div>
+    <div class="bbs-del-btns" style="flex-direction:column;gap:7px">
+      <button style="padding:10px;font-size:0.85rem;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;border:none;background:#3a6ea8;color:white" onclick="bbsSaveDraftAndClose()">💾 下書き保存して閉じる</button>
+      <button style="padding:10px;font-size:0.85rem;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;border:none;background:#c05050;color:white" onclick="bbsDiscardAndClose()">🗑️ 破棄して閉じる</button>
+      <button style="padding:10px;font-size:0.85rem;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;border:none;background:#f0f0f0;color:#555" onclick="bbsDiscardCancel()">書き続ける</button>
     </div>
   </div>
 </div>
@@ -721,8 +740,8 @@
   </div>
 </div>
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('practice',this)">🎵 練習</button>
-  <button class="tab-btn"        onclick="switchTab('admin',this)">📋 出欠</button>
+  <button class="tab-btn active" onclick="switchTab('practice',this)">🎵 練習情報</button>
+  <button class="tab-btn"        onclick="switchTab('admin',this)">📋 出欠登録</button>
   <button class="tab-btn"        onclick="switchTab('data',this)">⚙️ 基本登録</button>
 </div>
 
@@ -3971,17 +3990,81 @@ function bbsSubmitEdit(){
 }
 
 // ── 新規投稿 ──
+const BBS_DRAFT_KEY = 'bbs_draft_v1';
+
 function bbsShowNew(){
-  document.getElementById('bbs-n-author').value  = bbsLsGet(BBS_AUTHOR_KEY,'')||'';
-  document.getElementById('bbs-n-subject').value = '';
-  document.getElementById('bbs-n-body').value    = '';
+  document.getElementById('bbs-n-author').value = bbsLsGet(BBS_AUTHOR_KEY,'')||'';
+  // 下書き読み込み
+  const banner = document.getElementById('bbs-draft-banner');
+  try {
+    const draft = JSON.parse(localStorage.getItem(BBS_DRAFT_KEY)||'null');
+    if(draft && (draft.subject||draft.body)) {
+      document.getElementById('bbs-n-subject').value = draft.subject||'';
+      document.getElementById('bbs-n-body').value    = draft.body||'';
+      banner.style.display = 'block';
+    } else {
+      document.getElementById('bbs-n-subject').value = '';
+      document.getElementById('bbs-n-body').value    = '';
+      banner.style.display = 'none';
+    }
+  } catch(e){
+    document.getElementById('bbs-n-subject').value = '';
+    document.getElementById('bbs-n-body').value    = '';
+    banner.style.display = 'none';
+  }
   document.getElementById('bbs-ov-new').classList.add('open');
   setTimeout(()=>{
     const a=document.getElementById('bbs-n-author');
     (a.value?document.getElementById('bbs-n-subject'):a).focus();
   },200);
 }
-function bbsHideNew(){ document.getElementById('bbs-ov-new').classList.remove('open'); }
+
+// 強制クローズ（フォームリセット）
+function bbsHideNew(){
+  document.getElementById('bbs-ov-new').classList.remove('open');
+  document.getElementById('bbs-n-subject').value = '';
+  document.getElementById('bbs-n-body').value    = '';
+  document.getElementById('bbs-draft-banner').style.display = 'none';
+}
+
+// 下書き保存（画面は閉じない）
+function bbsSaveDraft(){
+  const subject = document.getElementById('bbs-n-subject').value;
+  const body    = document.getElementById('bbs-n-body').value;
+  if(!subject.trim() && !body.trim()){ showToast('⚠️ タイトルか本文を入力してから保存してください',2500); return; }
+  localStorage.setItem(BBS_DRAFT_KEY, JSON.stringify({subject, body}));
+  showToast('💾 下書きを保存しました',2200);
+}
+
+// 枠外タップ or キャンセルボタン → 内容があれば確認モーダル
+function bbsNewAskDiscard(){
+  const subject = document.getElementById('bbs-n-subject').value.trim();
+  const body    = document.getElementById('bbs-n-body').value.trim();
+  if(!subject && !body){ bbsHideNew(); return; }
+  document.getElementById('bbs-ov-discard').classList.add('open');
+}
+
+// 確認モーダル：下書き保存して閉じる
+function bbsSaveDraftAndClose(){
+  const subject = document.getElementById('bbs-n-subject').value;
+  const body    = document.getElementById('bbs-n-body').value;
+  localStorage.setItem(BBS_DRAFT_KEY, JSON.stringify({subject, body}));
+  document.getElementById('bbs-ov-discard').classList.remove('open');
+  bbsHideNew();
+  showToast('💾 下書きを保存しました',2200);
+}
+
+// 確認モーダル：破棄して閉じる
+function bbsDiscardAndClose(){
+  localStorage.removeItem(BBS_DRAFT_KEY);
+  document.getElementById('bbs-ov-discard').classList.remove('open');
+  bbsHideNew();
+}
+
+// 確認モーダル：書き続ける
+function bbsDiscardCancel(){
+  document.getElementById('bbs-ov-discard').classList.remove('open');
+}
 
 function bbsSubmitNew(){
   const author  = document.getElementById('bbs-n-author').value.trim();
@@ -3998,6 +4081,7 @@ function bbsSubmitNew(){
   bbsMarkSeen(t.id);
   bbsSaveThreads(threads);
   bbsRenderAll();
+  localStorage.removeItem(BBS_DRAFT_KEY);
   bbsHideNew();
   showToast('✅ 投稿しました！',2500);
 }
