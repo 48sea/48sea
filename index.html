@@ -95,8 +95,6 @@
   .badge-present   { background: var(--present-bg); color: var(--present); }
   .badge-absent    { background: var(--absent-bg);  color: var(--absent); }
 
-  /* ── ATTENDANCE GRID ── */
-
   /* ── SONG TABLE ── */
   .song-row { background: white; border-radius: 10px; margin-bottom: 6px; border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
   .song-row-header { background: var(--ink); color: var(--paper); padding: 5px 14px 5px 7px; display: flex; align-items: center; gap: 8px; }
@@ -104,8 +102,6 @@
   /* toast */
   .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px); background: rgba(26,26,46,0.92); color: #f5f0e8; padding: 9px 18px; border-radius: 24px; font-size: 0.8rem; font-weight: 500; z-index: 500; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; white-space: nowrap; max-width: 90vw; text-align: center; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* ── MEMBER SELECTOR (admin) ── */
 
   /* ── DATE CHIPS ── */
   .date-chip-list { display: flex; flex-direction: column; gap: 6px; }
@@ -147,10 +143,6 @@
   .toggle-thumb { width: 20px; height: 20px; border-radius: 50%; background: white; position: absolute; top: 2px; left: 2px; transition: left 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
   .toggle-track.on .toggle-thumb { left: 22px; }
 
-  /* conflict banner */
-  .conflict-banner { background: #fff3cd; border: 1px solid #f0d888; border-radius: 8px; padding: 10px 12px; font-size: 0.8rem; color: #856404; margin-bottom: 10px; display: none; }
-  .conflict-banner.show { display: block; }
-
   /* code block */
   .code-block { background: #1e1e2e; color: #cdd6f4; font-family: monospace; font-size: 0.68rem; padding: 10px; border-radius: 7px; margin-top: 8px; white-space: pre; overflow-x: auto; line-height: 1.5; }
   .gas-guide { margin-top: 14px; display: flex; flex-direction: column; gap: 12px; }
@@ -178,9 +170,6 @@
   .att-count-bar { background: var(--cream); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.82rem; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; border: 1px solid var(--border); }
   .att-count-total { font-weight: 700; color: var(--ink); }
   .att-count-chip { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 2px 9px; font-size: 0.75rem; font-weight: 600; color: var(--muted); }
-
-  /* ── コメント強調 ── */
-
 
   /* ゲスト追加ボタン行 */
   .guest-add-row { display: flex; justify-content: center; margin-top: 8px; }
@@ -494,8 +483,6 @@
   .notice-modal-header { background:var(--ink); color:white; display:flex; align-items:center; padding:12px 16px; gap:10px; flex-shrink:0; }
   .notice-modal-title { flex:1; font-size:1rem; font-weight:700; }
   .notice-modal-close { background:rgba(255,255,255,0.12); border:none; color:white; font-size:1rem; width:30px; height:30px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .notice-frame { display:none; } /* iframe廃止 */
-
   /* ── BBS インライン ── */
   .bbs-root { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#f4f4f4; }
   .bbs-toolbar { background:#2a2a2a; padding:9px 14px; display:flex; align-items:center; gap:8px; flex-shrink:0; }
@@ -747,7 +734,6 @@
 
 <!-- ── 練習アシスト ── -->
 <div id="screen-practice" class="screen active">
-  <div id="conflict-banner" class="conflict-banner" style="display:none!important"></div>
   <div class="collapsible-section open" id="cs-practice-dates">
     <div class="collapsible-header" onclick="toggleCollapsible('cs-practice-dates')">
       <div class="section-title" style="flex:none">📅 練習日を選ぶ</div>
@@ -3285,30 +3271,49 @@ function flattenData(d) {
   const map = {};
   const J = v => JSON.stringify(v);
 
-  // attendance: 日付×メンバー単位
+  // attendance: 日付×メンバー（ゲスト含む）単位
   Object.keys(d.attendance||{}).forEach(did => {
     Object.keys(d.attendance[did]||{}).forEach(mid => {
       map['att:'+did+':'+mid] = J(d.attendance[did][mid]);
     });
   });
 
-  // members: 一人単位
+  // members: 一人単位（休団期間も含む）
   (d.members||[]).forEach(m => {
-    map['member:'+m.id] = J({name:m.name, partId:m.partId||'', categoryId:m.categoryId||''});
+    map['member:'+m.id] = J({
+      name:m.name, partId:m.partId||'', categoryId:m.categoryId||'',
+      absenceFrom:m.absenceFrom||'', absenceTo:m.absenceTo||''
+    });
   });
-  // parts
+
+  // parts: 一パート単位
   (d.parts||[]).forEach((p,i) => { map['part:'+p.id] = J({name:p.name,order:i}); });
-  // categories
+
+  // categories: 一区分単位
   (d.categories||[]).forEach((c,i) => { map['cat:'+c.id] = J({name:c.name,bg:c.bg,fg:c.fg,order:i}); });
 
-  // dates: 一日単位（date/memo/confirmed）
+  // dates: 一日単位（全フィールド）
   (d.dates||[]).forEach(dt => {
-    map['date:'+dt.id] = J({date:dt.date, memo:dt.memo, confirmed:dt.confirmed});
+    map['date:'+dt.id] = J({
+      date:dt.date, memo:dt.memo||'', confirmed:!!dt.confirmed,
+      time:dt.time||'', place:dt.place||'', comment:dt.comment||'',
+      songIds:dt.songIds||[]
+    });
   });
 
-  // songs: 一曲単位（name）
+  // songs: 一曲単位
   (d.songs||[]).forEach(s => {
     map['song:'+s.id] = J({name:s.name});
+  });
+
+  // venues: 一施設単位（部屋リスト含む）
+  (d.venues||[]).forEach((v,i) => {
+    map['venue:'+v.id] = J({name:v.name, rooms:v.rooms||[], order:i});
+  });
+
+  // bbs: 一スレッド単位（返信含む）
+  (d.bbs||[]).forEach(t => {
+    map['bbs:'+t.id] = J({subject:t.subject, author:t.author, body:t.body, date:t.date, replies:t.replies||[]});
   });
 
   return map;
@@ -3342,20 +3347,16 @@ function mergeByItem(cloudData) {
     }
   });
 
-  // 衝突なしキーはクラウド変更をローカルに適用
-  // まず cloudData をベースに、衝突キーはローカル値を戻す
+  // cloudData をベースにマージ。衝突キーとローカルのみ変更キーはローカル値で上書き
   const merged = JSON.parse(JSON.stringify(cloudData));
-  if(!merged.attendance)    merged.attendance={};
+  if(!merged.attendance) merged.attendance={};
 
-  // 衝突キーをローカル値で上書き（ローカル優先で保持）
   conflicts.forEach(({key}) => {
     applyItemToData(key, local[key], merged);
   });
 
-  // ローカルのみ変更（クラウド未変更）→ merged に反映済み（cloudDataベースなので要上書き）
   localChanged.forEach(k => {
     if(!cloudChanged.has(k)) {
-      // クラウドが変えていない項目はローカル値で上書き
       applyItemToData(k, local[k], merged);
     }
   });
@@ -3378,18 +3379,53 @@ function applyItemToData(key, jsonVal, d) {
   } else if(type === 'member') {
     const mid = parts[1];
     const m = (d.members||[]).find(x=>x.id===mid);
-    if(m && val) { m.name=val.name; if(val.partId!==undefined) m.partId=val.partId; if(val.categoryId!==undefined) m.categoryId=val.categoryId; }
+    if(m && val) {
+      m.name=val.name;
+      if(val.partId!==undefined)      m.partId=val.partId;
+      if(val.categoryId!==undefined)  m.categoryId=val.categoryId;
+      if(val.absenceFrom!==undefined) m.absenceFrom=val.absenceFrom;
+      if(val.absenceTo!==undefined)   m.absenceTo=val.absenceTo;
+    }
+
+  } else if(type === 'part') {
+    const pid = parts[1];
+    const p = (d.parts||[]).find(x=>x.id===pid);
+    if(p && val) { p.name=val.name; }
+
+  } else if(type === 'cat') {
+    const cid = parts[1];
+    const c = (d.categories||[]).find(x=>x.id===cid);
+    if(c && val) { c.name=val.name; c.bg=val.bg; c.fg=val.fg; }
 
   } else if(type === 'date') {
     const did = parts[1];
     const dt = (d.dates||[]).find(x=>x.id===did);
-    if(dt && val) { dt.date=val.date; dt.memo=val.memo; dt.confirmed=val.confirmed; }
+    if(dt && val) {
+      dt.date=val.date; dt.memo=val.memo; dt.confirmed=val.confirmed;
+      dt.time=val.time||''; dt.place=val.place||'';
+      dt.comment=val.comment||''; dt.songIds=val.songIds||[];
+    }
 
   } else if(type === 'song') {
     const sid = parts[1];
     const s = (d.songs||[]).find(x=>x.id===sid);
     if(s && val) { s.name=val.name; }
 
+  } else if(type === 'venue') {
+    const vid = parts[1];
+    const v = (d.venues||[]).find(x=>x.id===vid);
+    if(v && val) { v.name=val.name; v.rooms=val.rooms||[]; }
+
+  } else if(type === 'bbs') {
+    const tid = parts[1];
+    if(!d.bbs) d.bbs=[];
+    const idx = d.bbs.findIndex(x=>x.id===tid);
+    if(idx !== -1 && val) {
+      d.bbs[idx].subject=val.subject; d.bbs[idx].body=val.body;
+      d.bbs[idx].replies=val.replies||[];
+    } else if(idx === -1 && val) {
+      d.bbs.push({id:tid, ...val});
+    }
   }
 }
 
@@ -3398,27 +3434,41 @@ function conflictLabel(key) {
   const parts = key.split(':');
   const type  = parts[0];
   if(type === 'att') {
-    const d = data.dates.find(x=>x.id===parts[1]);
-    const m = data.members.find(x=>x.id===parts[2]);
-    return '出欠：' + (d?fmtDate(d.date):'?') + ' / ' + (m?m.name:'?');
+    const dt = data.dates.find(x=>x.id===parts[1]);
+    const m  = data.members.find(x=>x.id===parts[2]);
+    return '出欠：' + (dt?fmtDate(dt.date):'?') + ' / ' + (m?m.name:parts[2].startsWith('guest_')?'ゲスト':'?');
   }
   if(type === 'member') {
     const m = data.members.find(x=>x.id===parts[1]);
-    return 'メンバー名：' + (m?m.name:'?');
+    return 'メンバー：' + (m?m.name:'?');
+  }
+  if(type === 'part') {
+    const p = data.parts.find(x=>x.id===parts[1]);
+    return 'パート：' + (p?p.name:'?');
+  }
+  if(type === 'cat') {
+    const c = data.categories.find(x=>x.id===parts[1]);
+    return '区分：' + (c?c.name:'?');
   }
   if(type === 'date') {
-    const d = data.dates.find(x=>x.id===parts[1]);
-    return '練習日：' + (d?fmtDate(d.date):'?');
+    const dt = data.dates.find(x=>x.id===parts[1]);
+    return '練習日：' + (dt?fmtDate(dt.date):'?');
   }
   if(type === 'song') {
     const s = data.songs.find(x=>x.id===parts[1]);
     return '曲目：' + (s?s.name:'?');
   }
+  if(type === 'venue') {
+    const v = (data.venues||[]).find(x=>x.id===parts[1]);
+    return '施設：' + (v?v.name:'?');
+  }
+  if(type === 'bbs') {
+    const t = (data.bbs||[]).find(x=>x.id===parts[1]);
+    return 'お知らせ：' + (t?t.subject:'?');
+  }
   return key;
 }
 function dismissConflict() {
-  const b=document.getElementById('conflict-banner');
-  if(b) b.classList.remove('show');
   pendingCloudData=null;
 }
 
