@@ -201,9 +201,7 @@
 
   /* 練習日選択＋サマリーバーはセットで間をゼロに */
   #cs-practice-dates { margin-bottom: 0; }
-  #cs-practice-dates:not(+ .practice-summary-bar.visible) { margin-bottom: 0; }
-  /* サマリーバーが非表示の時はcollapsibleに下余白を付ける */
-  #attendance-section { margin-top: 10px; }
+  #attendance-section { margin-top: 0; }
   .hdr-link-btn { display: inline-flex; align-items: center; gap: 3px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.82); font-size: 0.7rem; padding: 3px 9px; border-radius: 20px; text-decoration: none; font-family: 'Noto Sans JP', sans-serif; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
   .hdr-link-btn:hover { background: rgba(255,255,255,0.22); color: white; }
 
@@ -389,10 +387,12 @@
 
   /* ── 練習タブ：コメント一覧バー（緑系） ── */
   .prac-comment-bar-label { flex:1; font-size:0.85rem; font-weight:700; color:#fff; }
-  .prac-comment-bar { display:flex; align-items:center; gap:8px; padding:9px 14px; background:#2e7d5a; border:none; border-radius:9px; cursor:pointer; user-select:none; margin-bottom:0; }
+  .prac-comment-bar { display:flex; align-items:center; gap:8px; padding:9px 14px; background:#2e7d5a; border:none; border-radius:9px; cursor:pointer; user-select:none; margin-top:8px; margin-bottom:0; }
   .prac-comment-bar-arrow { color:#b8f0d8; transition:transform 0.2s; font-size:0.6rem; }
   .prac-comment-bar.open .prac-comment-bar-arrow { transform:rotate(90deg); }
-  .prac-comment-list { background:#f0faf5; border:1px solid #a8d8bc; border-radius:0 0 9px 9px; padding:8px 12px; margin-bottom:8px; border-top:none; }
+  .prac-comment-list { background:#f0faf5; border:1px solid #a8d8bc; border-radius:0 0 9px 9px; padding:8px 12px; border-top:none; }
+  /* コメント一覧コンテナ：常に下マージンを確保 */
+  .prac-comment-wrap { margin-bottom:8px; }
   .prac-comment-item { display:flex; gap:8px; align-items:baseline; padding:5px 0; border-bottom:1px solid #d0eedd; font-size:0.82rem; }
   .prac-comment-item:last-child { border-bottom:none; }
   .prac-comment-name { font-weight:700; flex-shrink:0; color:#1a5c3a; }
@@ -419,13 +419,13 @@
   .prac-comment-popup-text { font-size:0.88rem; color:#2a4a2a; font-weight:500; line-height:1.6; background:#f0faf5; padding:8px 10px; border-radius:7px; margin-top:4px; }
 
   /* ── 練習タブ：練習予定曲エリア ── */
-  .prac-song-area { background:white; border:1px solid #b8d0e8; border-radius:9px; padding:8px 12px; margin-bottom:8px; }
+  .prac-song-area { background:white; border:1px solid #b8d0e8; border-radius:9px; padding:8px 12px; margin-top:8px; margin-bottom:0; }
   .prac-song-label { font-size:0.75rem; font-weight:700; letter-spacing:0.08em; color:#3a6ea8; margin-bottom:6px; }
   .prac-song-list { display:flex; flex-wrap:wrap; gap:5px; }
   .prac-song-chip { font-size:0.78rem; padding:3px 10px; border-radius:20px; background:#e8f0fa; border:1px solid #b8d0e8; color:#2a4a7a; font-weight:600; }
 
   /* ── 練習タブ：ゲスト行 目立つデザイン ── */
-  .prac-guest-bar { background: linear-gradient(135deg,#1a3a6a,#2a5a8a); border:2px solid #5a9fd4; border-radius:9px; padding:7px 12px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+  .prac-guest-bar { background: linear-gradient(135deg,#1a3a6a,#2a5a8a); border:2px solid #5a9fd4; border-radius:9px; padding:7px 12px; margin-top:8px; margin-bottom:0; display:flex; align-items:center; gap:8px; }
   .prac-guest-bar-icon { font-size:1.2rem; }
   .prac-guest-bar-text { flex:1; font-size:0.82rem; color:#fff; font-weight:600; }
 
@@ -471,7 +471,7 @@
   .att-comment:focus { border-color: #2e7d5a; background: white; }
 
   /* ── サマリーバー ── */
-  .practice-summary-bar { background:white; border:1px solid #b8d0e8; border-top: none; border-left:4px solid #3a6ea8; border-radius:0 0 9px 9px; padding:8px 14px 10px; margin-bottom:10px; display:none; }
+  .practice-summary-bar { background:white; border:1px solid #b8d0e8; border-top: none; border-left:4px solid #3a6ea8; border-radius:0 0 9px 9px; padding:8px 14px 10px; margin-bottom:0; display:none; }
   .practice-summary-bar.visible { display:block; }
   .practice-summary-date { font-size:0.88rem; font-weight:700; color:var(--ink); margin-bottom:3px; }
   .practice-summary-meta { font-size:0.78rem; color:var(--muted); }
@@ -492,8 +492,11 @@
 
   /* ── BBS インライン ── */
   .bbs-root { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#f4f4f4; }
-  .bbs-toolbar { background:#2a2a2a; padding:9px 14px; display:flex; align-items:center; flex-shrink:0; }
-  .bbs-btn-new { background:#3a6ea8; border:none; color:white; font-size:0.78rem; font-weight:700; padding:6px 14px; border-radius:20px; cursor:pointer; font-family:inherit; margin-left:auto; }
+  .bbs-toolbar { background:#2a2a2a; padding:9px 14px; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .bbs-search-input { flex:1; font-family:'Noto Sans JP',sans-serif; font-size:0.8rem; padding:5px 10px; border:none; border-radius:20px; background:#484848; color:white; outline:none; min-width:0; }
+  .bbs-search-input::placeholder { color:#999; }
+  .bbs-search-input:focus { background:#555; }
+  .bbs-btn-new { background:#3a6ea8; border:none; color:white; font-size:0.78rem; font-weight:700; padding:6px 14px; border-radius:20px; cursor:pointer; font-family:inherit; flex-shrink:0; }
   .bbs-list { flex:1; overflow-y:auto; padding:10px 12px 20px; }
   .bbs-empty { text-align:center; padding:40px 0; color:#888; font-size:0.85rem; line-height:1.8; }
   /* スレッドアイテム */
@@ -517,7 +520,10 @@
   .bbs-post-author { font-size:0.75rem; font-weight:700; color:#3a6ea8; }
   .bbs-op-badge { font-size:0.6rem; background:#3a6ea8; color:white; border-radius:3px; padding:1px 5px; font-weight:700; }
   .bbs-post-date { font-size:0.65rem; color:#aaa; flex:1; }
-  .bbs-del-btn { font-size:0.65rem; background:none; border:1px solid #e0b0b0; color:#c05050; border-radius:4px; padding:2px 7px; cursor:pointer; font-family:inherit; flex-shrink:0; }
+  .bbs-del-btn  { font-size:0.65rem; background:none; border:1px solid #e0b0b0; color:#c05050; border-radius:4px; padding:2px 7px; cursor:pointer; font-family:inherit; flex-shrink:0; }
+  .bbs-edit-btn { font-size:0.65rem; background:none; border:1px solid #b0c8e8; color:#3a6ea8; border-radius:4px; padding:2px 7px; cursor:pointer; font-family:inherit; flex-shrink:0; }
+  /* 検索ハイライト */
+  .bbs-hl { background:#fff176; border-radius:2px; font-weight:700; }
   .bbs-post-body { font-size:0.82rem; line-height:1.65; color:#222; white-space:pre-wrap; word-break:break-word; }
   .bbs-reply-post { background:#fafafa; padding-left:16px; border-left:3px solid #e0e8f0; }
   /* 返信フォーム */
@@ -651,6 +657,7 @@
     <!-- BBS本体（インライン） -->
     <div id="bbs-root" class="bbs-root">
       <div class="bbs-toolbar">
+        <input id="bbs-search" class="bbs-search-input" type="text" placeholder="🔍 検索…" oninput="bbsSearch(this.value)"/>
         <button class="bbs-btn-new" onclick="bbsShowNew()">＋ 新規投稿</button>
       </div>
       <div id="bbs-list" class="bbs-list">
@@ -677,6 +684,18 @@
     </div>
   </div>
 </div>
+
+<!-- BBS 編集オーバーレイ -->
+<div id="bbs-ov-edit" class="bbs-overlay" onclick="if(event.target===this)bbsHideEdit()">
+  <div class="bbs-popup">
+    <div class="bbs-handle"></div>
+    <div class="bbs-popup-title">✏️ 編集</div>
+    <div id="bbs-edit-fields"></div>
+    <div class="bbs-submit-row">
+      <button class="bbs-btn-cancel" onclick="bbsHideEdit()">キャンセル</button>
+      <button class="bbs-btn-submit" onclick="bbsSubmitEdit()">保存する</button>
+    </div>
+  </div>
 
 <!-- BBS 削除確認モーダル -->
 <div id="bbs-ov-del" class="bbs-del-overlay" onclick="if(event.target===this)bbsCloseDel()">
@@ -732,11 +751,13 @@
       <span class="prac-guest-bar-text" id="prac-guest-bar-text"></span>
     </div>
     <!-- コメント一覧 -->
-    <div id="prac-comment-bar" class="prac-comment-bar" onclick="togglePracComments()">
-      <span class="prac-comment-bar-label">💬 コメント一覧</span>
-      <span class="prac-comment-bar-arrow">▶</span>
+    <div class="prac-comment-wrap">
+      <div id="prac-comment-bar" class="prac-comment-bar" onclick="togglePracComments()">
+        <span class="prac-comment-bar-label">💬 コメント一覧</span>
+        <span class="prac-comment-bar-arrow">▶</span>
+      </div>
+      <div id="prac-comment-list" class="prac-comment-list" style="display:none"></div>
     </div>
-    <div id="prac-comment-list" class="prac-comment-list" style="display:none"></div>
     <!-- パート別出欠 -->
     <div id="prac-att-list"></div>
   </div>
@@ -1053,7 +1074,7 @@ function showToast(msg, duration) {
 
 function fmtDate(s) {
   const d = new Date(s + 'T00:00:00');
-  return d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日（' + '日月火水木金土'[d.getDay()] + '）';
+  return d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日(' + '日月火水木金土'[d.getDay()] + ')';
 }
 function esc(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1551,8 +1572,10 @@ function renderCategoryList() {
   el.innerHTML=data.categories.map(c=>`
     <div class="list-item drag-item" id="cat-item-${c.id}" data-did="${c.id}">
       <div class="drag-handle"><span></span><span></span><span></span></div>
-      <div class="item-main">
-        <span class="cat-badge" style="background:${c.bg};color:${c.fg};font-size:0.78rem;padding:2px 10px">${esc(c.name)}</span>
+      <div class="item-main" style="display:flex;align-items:center;gap:10px">
+        <!-- 実態サンプル：練習タブと同じ「白背景＋fg色の太枠線＋fg色テキスト」 -->
+        <span style="display:inline-block;font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:6px;border:3px solid ${c.fg};background:white;color:${c.fg}">${esc(c.name)}</span>
+        <span style="font-size:0.65rem;color:var(--muted)">← 練習タブでの表示</span>
       </div>
       <div class="item-actions">
         <button class="btn btn-sm btn-ghost" onclick="startEditCategory('${c.id}')">編集</button>
@@ -3693,7 +3716,9 @@ const BBS_SEEN_KEY    = 'bbs_seen';
 const BBS_MYPOSTS_KEY = 'bbs_myposts';
 
 let _noticeOpen = false;
-let _bbsDelTarget = null;
+let _bbsDelTarget  = null;
+let _bbsEditTarget = null;   // {tid, ri} — ri=null はスレッド本文
+let _bbsSearchQuery = '';
 
 // ── LS helpers ──
 function bbsLsGet(k,def){ try{const v=localStorage.getItem(k);return v===null?def:JSON.parse(v);}catch{return def;} }
@@ -3750,27 +3775,61 @@ function bbsRenderAll() {
   const threads = bbsGetThreads();
   const el = document.getElementById('bbs-list');
   if(!el) return;
-  // 開いているスレッドを記憶
+  const q = _bbsSearchQuery.trim().toLowerCase();
+  // 開いているスレッドを記憶（検索時は検索結果を強制展開するので上書き）
   const openIds = new Set([...el.querySelectorAll('.bbs-thread.open')].map(e=>e.dataset.tid));
 
   if(!threads.length) {
     el.innerHTML='<div class="bbs-empty">📭 まだ投稿がありません<br>「＋ 新規投稿」から書き込めます</div>';
     updateNoticeBadge(0); return;
   }
+
+  // ハイライト関数（検索ワードをマーク）
+  function hl(text) {
+    if(!q) return esc(text);
+    const safe = esc(text);
+    const qEsc = q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    return safe.replace(new RegExp(qEsc,'gi'), m=>`<mark class="bbs-hl">${m}</mark>`);
+  }
+
+  // スレッド検索フィルタ
+  function matchThread(t) {
+    if(!q) return true;
+    if((t.subject||'').toLowerCase().includes(q)) return true;
+    if((t.author ||'').toLowerCase().includes(q)) return true;
+    if((t.body   ||'').toLowerCase().includes(q)) return true;
+    return (t.replies||[]).some(r=>
+      (r.author||'').toLowerCase().includes(q)||(r.body||'').toLowerCase().includes(q));
+  }
+
   el.innerHTML='';
+  const savedAuthor=bbsLsGet(BBS_AUTHOR_KEY,'')||'';
+  let visibleCount=0;
+
   [...threads].sort((a,b)=>b.date-a.date).forEach(t=>{
+    if(!matchThread(t)) return;
+    visibleCount++;
     const unread=!_bbsSeen.has(t.id);
     const replies=t.replies||[];
-    const savedAuthor=bbsLsGet(BBS_AUTHOR_KEY,'')||'';
+    // 検索中は強制展開、それ以外は記憶状態
+    const isOpen = q ? true : openIds.has(t.id);
+    const myThread = bbsIsMine(t.id);
+
     const div=document.createElement('div');
-    div.className='bbs-thread'+(openIds.has(t.id)?' open':'');
+    div.className='bbs-thread'+(isOpen?' open':'');
     div.dataset.tid=t.id;
+
+    // 削除・編集ボタン（スレッド本文）
+    const mainBtns = `
+      ${myThread?`<button class="bbs-edit-btn" onclick="bbsShowEdit(event,'${t.id}',null)">編集</button>`:''}
+      <button class="bbs-del-btn" onclick="bbsAskDel(event,'${t.id}',null)">削除</button>`;
+
     div.innerHTML=`
       <div class="bbs-thread-hdr" onclick="bbsToggle('${t.id}')">
         <div class="bbs-unread-dot ${unread?'':'read'}"></div>
         <div class="bbs-thread-meta">
-          <div class="bbs-thread-title">${esc(t.subject)}</div>
-          <div class="bbs-thread-info"><span class="bbs-thread-author">${esc(t.author)}</span><span>${bbsFmtDt(t.date)}</span></div>
+          <div class="bbs-thread-title">${hl(t.subject)}</div>
+          <div class="bbs-thread-info"><span class="bbs-thread-author">${hl(t.author)}</span><span>${bbsFmtDt(t.date)}</span></div>
         </div>
         ${replies.length?`<span class="bbs-reply-badge">返信${replies.length}</span>`:''}
         <span class="bbs-arrow">▶</span>
@@ -3778,22 +3837,26 @@ function bbsRenderAll() {
       <div class="bbs-thread-body">
         <div class="bbs-post">
           <div class="bbs-post-hdr">
-            <span class="bbs-post-author">${esc(t.author)}</span>
+            <span class="bbs-post-author">${hl(t.author)}</span>
             <span class="bbs-op-badge">OP</span>
             <span class="bbs-post-date">${bbsFmtDt(t.date)}</span>
-            <button class="bbs-del-btn" onclick="bbsAskDel(event,'${t.id}',null)">削除</button>
+            ${mainBtns}
           </div>
-          <div class="bbs-post-body">${esc(t.body)}</div>
+          <div class="bbs-post-body">${hl(t.body)}</div>
         </div>
-        ${replies.map((r,ri)=>`
-          <div class="bbs-post bbs-reply-post">
+        ${replies.map((r,ri)=>{
+          const myReply=bbsIsMine(`${t.id}:${ri}`);
+          const replyBtns=`
+            ${myReply?`<button class="bbs-edit-btn" onclick="bbsShowEdit(event,'${t.id}',${ri})">編集</button>`:''}
+            <button class="bbs-del-btn" onclick="bbsAskDel(event,'${t.id}',${ri})">削除</button>`;
+          return `<div class="bbs-post bbs-reply-post">
             <div class="bbs-post-hdr">
-              <span class="bbs-post-author">${esc(r.author)}</span>
+              <span class="bbs-post-author">${hl(r.author)}</span>
               <span class="bbs-post-date">${bbsFmtDt(r.date)}</span>
-              <button class="bbs-del-btn" onclick="bbsAskDel(event,'${t.id}',${ri})">削除</button>
+              ${replyBtns}
             </div>
-            <div class="bbs-post-body">${esc(r.body)}</div>
-          </div>`).join('')}
+            <div class="bbs-post-body">${hl(r.body)}</div>
+          </div>`;}).join('')}
         <div class="bbs-reply-form" id="bbs-rf-${t.id}">
           <div class="bbs-form-label" style="margin-bottom:5px">💬 返信する</div>
           <input type="text" id="bbs-ra-${t.id}" class="bbs-input" style="margin-bottom:6px" placeholder="名前" maxlength="30" value="${esc(savedAuthor)}"/>
@@ -3806,6 +3869,10 @@ function bbsRenderAll() {
       </div>`;
     el.appendChild(div);
   });
+
+  if(visibleCount===0) {
+    el.innerHTML=`<div class="bbs-empty">🔍 「${esc(q)}」に一致する投稿はありません</div>`;
+  }
   const unreadCount=threads.filter(t=>!_bbsSeen.has(t.id)).length;
   updateNoticeBadge(unreadCount);
 }
@@ -3823,6 +3890,64 @@ function bbsToggle(id) {
     updateNoticeBadge(unreadCount);
     setTimeout(()=>{ const rf=item.querySelector('.bbs-reply-form'); rf?.scrollIntoView({behavior:'smooth',block:'nearest'}); },200);
   }
+}
+
+// ── 検索 ──
+function bbsSearch(val){
+  _bbsSearchQuery = val||'';
+  bbsRenderAll();
+}
+
+// ── 編集 ──
+function bbsShowEdit(e, tid, replyIdx){
+  e.stopPropagation();
+  const ri = (replyIdx===null||replyIdx===undefined||replyIdx==='null') ? null : Number(replyIdx);
+  _bbsEditTarget = {tid, ri};
+  const threads = bbsGetThreads();
+  const t = threads.find(t=>t.id===tid); if(!t) return;
+
+  const fieldsEl = document.getElementById('bbs-edit-fields');
+  if(ri !== null) {
+    // 返信の編集
+    const r = (t.replies||[])[ri]; if(!r) return;
+    fieldsEl.innerHTML=`
+      <div class="bbs-form-label">本文 *</div>
+      <textarea id="bbs-edit-body" class="bbs-input bbs-textarea">${esc(r.body)}</textarea>`;
+  } else {
+    // スレッド本文の編集
+    fieldsEl.innerHTML=`
+      <div class="bbs-form-label">タイトル *</div>
+      <input id="bbs-edit-subject" type="text" class="bbs-input" value="${esc(t.subject)}" maxlength="60"/>
+      <div class="bbs-form-label">本文 *</div>
+      <textarea id="bbs-edit-body" class="bbs-input bbs-textarea">${esc(t.body)}</textarea>`;
+  }
+  document.getElementById('bbs-ov-edit').classList.add('open');
+  setTimeout(()=>{ const f=document.getElementById('bbs-edit-body'); if(f){f.focus();f.setSelectionRange(f.value.length,f.value.length);} },200);
+}
+function bbsHideEdit(){ document.getElementById('bbs-ov-edit').classList.remove('open'); _bbsEditTarget=null; }
+
+function bbsSubmitEdit(){
+  if(!_bbsEditTarget) return;
+  const {tid, ri} = _bbsEditTarget;
+  const body = document.getElementById('bbs-edit-body')?.value.trim();
+  if(!body){ showToast('⚠️ 本文を入力してください',2500); return; }
+
+  const threads = bbsGetThreads();
+  const t = threads.find(t=>t.id===tid); if(!t) return;
+
+  if(ri !== null) {
+    if(t.replies && t.replies[ri]) t.replies[ri].body = body;
+  } else {
+    const subject = document.getElementById('bbs-edit-subject')?.value.trim();
+    if(subject !== undefined && !subject){ showToast('⚠️ タイトルを入力してください',2500); return; }
+    if(subject !== undefined) t.subject = subject;
+    t.body = body;
+    t.edited = true;
+  }
+  bbsSaveThreads(threads);
+  bbsHideEdit();
+  bbsRenderAll();
+  showToast('✅ 編集しました',2500);
 }
 
 // ── 新規投稿 ──
