@@ -4253,17 +4253,13 @@ if(autoSync){
 // 起動時の未読チェック
 bbsCheckUnread();
 
-// ── 「戻る」ボタン制御（PWA用） ──
-// Androidでは popstate の処理完了前に次の「戻る」が来うるため、
-// 起動時に大量の底止めを積んでおき、popstate のたびに補充する方式。
-(function initBackGuard() {
-  // 100枚積んでおけばどれだけ連打されても底をつかない
-  for(let i = 0; i < 100; i++) history.pushState(null, '', location.href);
-})();
-
-window.addEventListener('popstate', () => {
-  // 消費された分を即補充
-  for(let i = 0; i < 100; i++) history.pushState(null, '', location.href);
+// ── PWA「戻る」対策：バックグラウンドから復帰したとき画面を再初期化 ──
+window.addEventListener('pageshow', (e) => {
+  // persisted=true はbfcache（戻る/進むキャッシュ）から復帰したケース
+  if(e.persisted) {
+    // ページ全体をリロードして正常状態に戻す
+    location.reload();
+  }
 });
 </script>
 <div id="toast" class="toast"></div>
