@@ -1198,16 +1198,12 @@ function switchTab(name, btn) {
   }
   _doSwitchTab(name, btn);
 }
-let _switchingFromPopstate = false;
-
 function _doSwitchTab(name, btn) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
   btn.classList.add('active');
   localStorage.setItem('ensemble_last_tab', name);
-  // popstate経由でない場合のみ履歴に積む
-  if(!_switchingFromPopstate) history.pushState({ tab: name }, '', location.href);
   if (name==='practice') {
     renderPracticeDates();
     if(selectedDateId) renderPracticeAttendance();
@@ -4258,33 +4254,16 @@ if(autoSync){
 bbsCheckUnread();
 
 // ── 「戻る」ボタン制御（PWA用） ──
-// 起動時に現在タブ名をstateとして履歴に積む（アプリ外に出るのを防ぐ底止め）
+// Androidでは popstate の処理完了前に次の「戻る」が来うるため、
+// 起動時に大量の底止めを積んでおき、popstate のたびに補充する方式。
 (function initBackGuard() {
-  const saved = localStorage.getItem('ensemble_last_tab') || 'practice';
-  history.replaceState({ tab: saved }, '', location.href);
-  // 底止めを2枚積んで連打されても抜けないようにする
-  history.pushState({ tab: saved }, '', location.href);
-  history.pushState({ tab: saved }, '', location.href);
+  // 100枚積んでおけばどれだけ連打されても底をつかない
+  for(let i = 0; i < 100; i++) history.pushState(null, '', location.href);
 })();
 
-window.addEventListener('popstate', (e) => {
-  const tabNames = ['practice', 'admin', 'data'];
-  const tabName  = (e.state && tabNames.includes(e.state.tab)) ? e.state.tab : 'practice';
-
-  // 底止めを2枚積んで連打されても抜けないようにする
-  history.pushState({ tab: tabName }, '', location.href);
-  history.pushState({ tab: tabName }, '', location.href);
-
-  // dataタブは未解除なら practiceに戻す
-  const target = (tabName === 'data' && !isDataUnlocked()) ? 'practice' : tabName;
-
-  const idx = ['practice','admin','data'].indexOf(target);
-  const btns = document.querySelectorAll('.tab-btn');
-  if(btns[idx]) {
-    _switchingFromPopstate = true;
-    _doSwitchTab(target, btns[idx]);
-    _switchingFromPopstate = false;
-  }
+window.addEventListener('popstate', () => {
+  // 消費された分を即補充
+  for(let i = 0; i < 100; i++) history.pushState(null, '', location.href);
 });
 </script>
 <div id="toast" class="toast"></div>
