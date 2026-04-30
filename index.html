@@ -4262,7 +4262,8 @@ bbsCheckUnread();
 (function initBackGuard() {
   const saved = localStorage.getItem('ensemble_last_tab') || 'practice';
   history.replaceState({ tab: saved }, '', location.href);
-  // もう1つダミーを積んで、初回「戻る」でreplaceStateに到達させる
+  // 底止めを2枚積んで連打されても抜けないようにする
+  history.pushState({ tab: saved }, '', location.href);
   history.pushState({ tab: saved }, '', location.href);
 })();
 
@@ -4270,7 +4271,8 @@ window.addEventListener('popstate', (e) => {
   const tabNames = ['practice', 'admin', 'data'];
   const tabName  = (e.state && tabNames.includes(e.state.tab)) ? e.state.tab : 'practice';
 
-  // 常にダミーを積み直してアプリ外に出ないようにする
+  // 底止めを2枚積んで連打されても抜けないようにする
+  history.pushState({ tab: tabName }, '', location.href);
   history.pushState({ tab: tabName }, '', location.href);
 
   // dataタブは未解除なら practiceに戻す
