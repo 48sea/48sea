@@ -626,6 +626,7 @@
       📢
       <span id="notice-badge" class="notice-badge" style="display:none">0</span>
     </button><span style="font-size:0.55rem;color:#dfdfdf;font-weight:400;opacity:0.5;letter-spacing:0.05em;vertical-align:middle">お知らせ</span>
+    <button id="btn-install" class="notice-btn" onclick="onInstallBtnClick()" title="アプリをインストール" style="font-size:1rem">📲</button><span id="install-btn-label" style="font-size:0.55rem;color:#dfdfdf;font-weight:400;opacity:0.5;letter-spacing:0.05em;vertical-align:middle">インストール</span>
   </div>
   <div class="header-sync">
     <a id="hdr-link-score" href="https://drive.google.com/drive/folders/1gI-0Cq9sPegeLAQSRFIUABJtn_W4_Jyy?usp=sharing" target="_blank" class="hdr-link-btn">📄 楽譜</a>
@@ -638,6 +639,18 @@
       📡 保存
       <div class="hdr-push-ok" id="hdr-push-ok">✅</div>
     </button>
+  </div>
+</div>
+
+<!-- ── インストールモーダル ── -->
+<div id="install-modal" class="bbs-del-overlay" onclick="if(event.target===this)closeInstallModal()">
+  <div class="bbs-del-box" style="max-width:340px">
+    <div class="bbs-del-icon" id="install-modal-icon">📲</div>
+    <div class="bbs-del-title" id="install-modal-title"></div>
+    <div class="bbs-del-sub" id="install-modal-body"></div>
+    <div class="bbs-del-btns">
+      <button onclick="closeInstallModal()" style="background:#3a6ea8;color:white">閉じる</button>
+    </div>
   </div>
 </div>
 
@@ -4252,6 +4265,80 @@ if(autoSync){
 }
 // 起動時の未読チェック
 bbsCheckUnread();
+
+// ── PWA インストールボタン ──
+let deferredInstallPrompt = null;
+const _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !/crios/i.test(navigator.userAgent);
+const _isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                   || window.matchMedia('(display-mode: fullscreen)').matches
+                   || ('standalone' in navigator && navigator.standalone === true);
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  // インストール完了後はボタンを非表示に
+  const btn = document.getElementById('btn-install');
+  const lbl = document.getElementById('install-btn-label');
+  if(btn) btn.style.display = 'none';
+  if(lbl) lbl.style.display = 'none';
+});
+
+function showInstallModal(icon, title, body) {
+  document.getElementById('install-modal-icon').textContent  = icon;
+  document.getElementById('install-modal-title').textContent = title;
+  document.getElementById('install-modal-body').innerHTML    = body;
+  document.getElementById('install-modal').classList.add('open');
+}
+function closeInstallModal() {
+  document.getElementById('install-modal').classList.remove('open');
+}
+
+async function onInstallBtnClick() {
+  // スタンドアロン起動中（インストール済み）
+  if(_isStandalone) {
+    showInstallModal('✅', 'インストール済み',
+      'このアプリはすでにインストールされています。');
+    return;
+  }
+  // Chrome/Edge Android・PC → ネイティブダイアログ
+  if(deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if(outcome === 'accepted') deferredInstallPrompt = null;
+    return;
+  }
+  // iOS Safari → 手順説明
+  if(_isIOS) {
+    showInstallModal('📲', 'iOSへのインストール方法',
+      '<ol style="padding-left:1.2em;margin:0;line-height:2">' +
+      '<li>Safariで <strong>共有ボタン（□↑）</strong> をタップ</li>' +
+      '<li>「<strong>ホーム画面に追加</strong>」を選択</li>' +
+      '<li>右上の「<strong>追加</strong>」をタップ</li>' +
+      '</ol>' +
+      '<p style="margin-top:8px;font-size:0.75rem;color:#888">※ Chrome・Firefoxでは対応していません。</p>');
+    return;
+  }
+  // その他（Androidブラウザ等）
+  showInstallModal('📲', 'インストール方法',
+    '<ol style="padding-left:1.2em;margin:0;line-height:2">' +
+    '<li><strong>Chrome：</strong>アドレスバー右端「⊕」または「⋮」→「アプリをインストール」</li>' +
+    '<li><strong>Edge：</strong>「…」→「アプリ」→「このサイトをアプリとしてインストール」</li>' +
+    '</ol>');
+}
+
+// スタンドアロン起動中はボタンを非表示
+(function() {
+  if(_isStandalone) {
+    const btn = document.getElementById('btn-install');
+    const lbl = document.getElementById('install-btn-label');
+    if(btn) btn.style.display = 'none';
+    if(lbl) lbl.style.display = 'none';
+  }
+})();
+
 
 // ── PWA「戻る」対策：バックグラウンドから復帰したとき画面を再初期化 ──
 window.addEventListener('pageshow', (e) => {
