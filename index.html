@@ -1095,6 +1095,12 @@ if ('serviceWorker' in navigator) {
         console.log('ServiceWorker 登録失敗:', error);
       });
   });
+  // SWがindex.htmlの更新を検知したら自動リロード
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SW_UPDATED') {
+      location.reload();
+    }
+  });
 }
 // ══════════════════════════════════════════════════════
 // UTILS (最初に定義 - 他の関数から参照されるため)
